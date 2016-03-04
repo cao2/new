@@ -47,7 +47,7 @@ end CPU;
 
 
 architecture Behavioral of CPU is
- signal first_time : boolean:=true;
+ signal first_time : integer:=0;
 
 begin
 -- processor random generate read or write request
@@ -68,16 +68,17 @@ begin
     begin
      if reset = '1' then
         new_req := (others => '0');
-        first_time <= false;
+        first_time <= 0;
      elsif (rising_edge(Clock)) then
-        if reset = '0' and first_time = false then
-            first_time <= true;
-        end if;
-        
-        if (first_time = false) then
+       
+        if (first_time <50) then
+           first_time <= first_time+1;
+           rand1 := selection(2);
+           rand2 :=selection(2**15-1,16);
+           rand3 :=selection(2**15-1,32);
      	  if (full_c/='1') then
           	if (rand1 = 1) then---read
-            	new_req := "101" & "0000000111111111" & "11110000001111111111111111111111";
+            	new_req := "101" & rand2 & rand3;
           	elsif (rand1 =2) then
             	new_req := "110"& rand2 & rand3;
           	end if;
