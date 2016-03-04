@@ -74,6 +74,7 @@ clk_gen : process
        variable logsr: string(8 downto 1);
        variable x : integer:=0;
        variable empp: string(51 downto 1) := (others => 'N');
+       varibale coma: string(2 downto 1) := ", ";
    begin
    -- Generate a clock cycle
    loop
@@ -86,38 +87,38 @@ clk_gen : process
 		else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, ", ");
+		write(line_output, coma);
 		if cpu_req2(50 downto 50) = "1" then
 			write(line_output, cpu_req2);
 		else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, ", ");
+		write(line_output, coma);
      	if cpu_res1(50 downto 50) = "1" then
             write(line_output, cpu_res1);
         else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, ", ");
+		write(line_output, coma);
         if cpu_res2(50 downto 50) = "1" then
 
             write(line_output, cpu_res2);
         else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, ", ");
+		write(line_output, coma);
         if bus_req1(50 downto 50) = "1" then
             write(line_output, bus_req1);
         else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, ", ");
+		write(line_output, coma);
         if bus_req2(50 downto 50) = "1" then
             write(line_output, bus_req2);
         else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, ", ");     
+		write(line_output, coma);     
      	if bus_res1(50 downto 50) = "1" then
      		
            	write(line_output, bus_res1);
@@ -128,62 +129,62 @@ clk_gen : process
         else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, ", ");
+		write(line_output, coma);
         if wb_req1(50 downto 50) = "1" then
             write(line_output, wb_req1);
         else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, ", ");
+		write(line_output, coma);
         if wb_req2(50 downto 50) = "1" then
         	
             write(line_output, wb_req2);
         else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, ", ");    
+		write(line_output, coma);    
         
         if snoop_req1(50 downto 50) = "1" then
             write(line_output, snoop_req1);
        	else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, ", ");
+		write(line_output, coma);
         if snoop_req2(50 downto 50) = "1" then
 
             write(line_output, snoop_req2);
         else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, ", ");      
+		write(line_output, coma);      
          if snoop_res1(50 downto 50) = "1" then
 
             write(line_output, snoop_res1);
          else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, ", ");
+		write(line_output, coma);
         if snoop_res2(50 downto 50) = "1" then
         	
             write(line_output, snoop_res2);
         else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, ", ");
+		write(line_output, coma);
         if tomem(50 downto 50) = "1" then
         	
             write(line_output, tomem);
         else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, ", ");
+		write(line_output, coma);
         if memres(50 downto 50) = "1" then
         	
             write(line_output, memres);
         else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, ", ");       
+		write(line_output, coma);       
         if mem_wb(50 downto 50) = "1" then
 
             write(line_output, mem_wb);
