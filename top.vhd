@@ -56,7 +56,7 @@ architecture Behavioral of top is
    
    signal mem_wb: std_logic_vector(50 downto 0);
    signal wb_ack: std_logic;
-   file trace_file: TEXT open write_mode is "trace.log";
+   file trace_file: TEXT open write_mode is "trace1.log";
 begin
 reset_proc : process
     begin
@@ -86,32 +86,42 @@ clk_gen : process
 		else
 		    write(line_output, empp);  
 		end if;
+		write(line_output, ", ");
 		if cpu_req2(50 downto 50) = "1" then
 		   
 			write(line_output, cpu_req2);
-		     
+		else
+		    write(line_output, empp);  
 		end if;
+		write(line_output, ", ");
      	if cpu_res1(50 downto 50) = "1" then
      	   	
             write(line_output, cpu_res1);
-             
-        end if;
+        else
+		    write(line_output, empp);  
+		end if;
+		write(line_output, ", ");
         if cpu_res2(50 downto 50) = "1" then
 
             write(line_output, cpu_res2);
-             
-        end if;
-        
+        else
+		    write(line_output, empp);  
+		end if;
+		write(line_output, ", ");
         if bus_req1(50 downto 50) = "1" then
         
             write(line_output, bus_req1);
-             
-        end if;
+        else
+		    write(line_output, empp);  
+		end if;
+		write(line_output, ", ");
         if bus_req2(50 downto 50) = "1" then
 
             write(line_output, bus_req2);
-             
-        end if;      
+        else
+		    write(line_output, empp);  
+		end if;
+		write(line_output, ", ");     
      	if bus_res1(50 downto 50) = "1" then
      		
            	write(line_output, bus_res1);
@@ -120,56 +130,77 @@ clk_gen : process
         if bus_res2(50 downto 50) = "1" then
     
            	write(line_output, bus_res2);
-           	 
-        end if;
-
+        else
+		    write(line_output, empp);  
+		end if;
+		write(line_output, ", ");
         if wb_req1(50 downto 50) = "1" then
 
             write(line_output, wb_req1);
-             
-        end if;
+        else
+		    write(line_output, empp);  
+		end if;
+		write(line_output, ", ");
         if wb_req2(50 downto 50) = "1" then
         	
             write(line_output, wb_req2);
-             
-        end if;    
+        else
+		    write(line_output, empp);  
+		end if;
+		write(line_output, ", ");    
         
         if snoop_req1(50 downto 50) = "1" then
 
             write(line_output, snoop_req1);
              
-        end if;
+       else
+		    write(line_output, empp);  
+		end if;
+		write(line_output, ", ");
         if snoop_req2(50 downto 50) = "1" then
 
             write(line_output, snoop_req2);
-             
-        end if;      
+        else
+		    write(line_output, empp);  
+		end if;
+		write(line_output, ", ");      
          if snoop_res1(50 downto 50) = "1" then
 
             write(line_output, snoop_res1);
-             
-        end if;
+         else
+		    write(line_output, empp);  
+		end if;
+		write(line_output, ", ");
         if snoop_res2(50 downto 50) = "1" then
         	
             write(line_output, snoop_res2);
-             
-        end if;
-          
+        else
+		    write(line_output, empp);  
+		end if;
+		write(line_output, ", ");
         if tomem(50 downto 50) = "1" then
         	
             write(line_output, tomem);
-                        
-        end if; 
+        else
+		    write(line_output, empp);  
+		end if;
+		write(line_output, ", ");
         if memres(50 downto 50) = "1" then
         	
             write(line_output, memres);
-                        
-        end if;        
+        else
+		    write(line_output, empp);  
+		end if;
+		write(line_output, ", ");       
         if mem_wb(50 downto 50) = "1" then
 
             write(line_output, mem_wb);
-                        
-        end if;       	  
+        else
+		    write(line_output, empp);  
+		end if;
+
+
+		writeline(trace_file, line_output);
    end loop;
  end process;
   
