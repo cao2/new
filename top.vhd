@@ -88,14 +88,12 @@ clk_gen : process
 		end if;
 		write(line_output, ", ");
 		if cpu_req2(50 downto 50) = "1" then
-		   
 			write(line_output, cpu_req2);
 		else
 		    write(line_output, empp);  
 		end if;
 		write(line_output, ", ");
      	if cpu_res1(50 downto 50) = "1" then
-     	   	
             write(line_output, cpu_res1);
         else
 		    write(line_output, empp);  
@@ -109,14 +107,12 @@ clk_gen : process
 		end if;
 		write(line_output, ", ");
         if bus_req1(50 downto 50) = "1" then
-        
             write(line_output, bus_req1);
         else
 		    write(line_output, empp);  
 		end if;
 		write(line_output, ", ");
         if bus_req2(50 downto 50) = "1" then
-
             write(line_output, bus_req2);
         else
 		    write(line_output, empp);  
@@ -128,14 +124,12 @@ clk_gen : process
            	 
         end if;
         if bus_res2(50 downto 50) = "1" then
-    
            	write(line_output, bus_res2);
         else
 		    write(line_output, empp);  
 		end if;
 		write(line_output, ", ");
         if wb_req1(50 downto 50) = "1" then
-
             write(line_output, wb_req1);
         else
 		    write(line_output, empp);  
@@ -150,10 +144,8 @@ clk_gen : process
 		write(line_output, ", ");    
         
         if snoop_req1(50 downto 50) = "1" then
-
             write(line_output, snoop_req1);
-             
-       else
+       	else
 		    write(line_output, empp);  
 		end if;
 		write(line_output, ", ");
