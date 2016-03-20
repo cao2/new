@@ -20,10 +20,9 @@
 
 
 library IEEE;
-library xil_defaultlib;
 use IEEE.STD_LOGIC_1164.ALL;
 USE ieee.numeric_std.ALL;
-use xil_defaultlib.nondeterminism.all;
+use work.nondeterminism.all;
 use std.textio.all;
 use IEEE.std_logic_textio.all; 
 -- Uncomment the following library declaration if using

@@ -18,11 +18,10 @@
 -- 
 ----------------------------------------------------------------------------------
 library IEEE;
-library xil_defaultlib;
 use IEEE.STD_LOGIC_1164.ALL;
-use iEEE.std_logic_unsigned.all ;
+--use iEEE.std_logic_unsigned.all ;
 USE ieee.numeric_std.ALL;
-use xil_defaultlib.all;
+
 use std.textio.all;
 use IEEE.std_logic_textio.all; 
 -- Uncomment the following library declaration if using
@@ -193,8 +192,8 @@ clk_gen : process
         else
 		    write(line_output, empp);  
 		end if;
-
-
+		write(line_output, coma);
+		write(line_output,wb_ack);
 		writeline(trace_file, line_output);
    end loop;
  end process;

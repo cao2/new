@@ -22,10 +22,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 USE ieee.numeric_std.ALL;
-use std.textio.all;
-use IEEE.std_logic_textio.all;          -- I/O for logic types
-library xil_defaultlib;
-use xil_defaultlib.writefunction.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -49,7 +45,7 @@ end Memory;
 
 architecture Behavioral of Memory is
      type rom_type is array (2**16-1 downto 0) of std_logic_vector (31 downto 0);     
-     signal ROM_array : rom_type:= ((others=> (others=>'0')));
+     signal ROM_array : rom_type:= (others=> (others=>'0'));
 
 begin
     

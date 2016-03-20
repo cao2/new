@@ -20,13 +20,9 @@
 
 
 library IEEE;
-library xil_defaultlib;
 use IEEE.STD_LOGIC_1164.ALL;
 --use iEEE.std_logic_unsigned.all ;
 USE ieee.numeric_std.ALL;
-use std.textio.all;
-use IEEE.std_logic_textio.all; 
-use xil_defaultlib.all;
 --use IEEE.STD_LOGIC_ARITH.ALL;
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -72,7 +68,7 @@ architecture Behavioral of L1Cache is
 --3 lsb: dirty bit, valid bit, exclusive bit
 --cache hold valid bit ,dirty bit, exclusive bit, 6 bits tag, 32 bits data, 41 bits in total
 	type rom_type is array (2**10-1 downto 0) of std_logic_vector (40 downto 0);     
-	signal ROM_array : rom_type:= ((others => (others =>'0')));
+	signal ROM_array : rom_type:= (others => (others =>'0'));
 	signal we1,we2,we3,re1,re2,re3: std_logic:='0';
 	signal out1,out2,out3:std_logic_vector(50 downto 0);
 	signal emp1,emp2,emp3,ful1,ful2,ful3: std_logic:='0';	
@@ -89,7 +85,7 @@ architecture Behavioral of L1Cache is
 	signal tmp_write_req, tmp_cpu_res1, tmp_cpu_res2, tmp_cache_req: std_logic_vector(50 downto 0):=(others => '0');
 	
 begin
-	cpu_req_fif: entity xil_defaultlib.STD_FIFO(Behavioral) port map(
+	cpu_req_fif: entity work.STD_FIFO(Behavioral) port map(
 		CLK=>Clock,
 		RST=>reset,
 		DataIn=>in1,
@@ -99,7 +95,7 @@ begin
 		Full=>full_cprq,
 		Empty=>emp1
 		);
-	snp_req_fif: entity xil_defaultlib.STD_FIFO(Behavioral) port map(
+	snp_req_fif: entity work.STD_FIFO(Behavioral) port map(
 		CLK=>Clock,
 		RST=>reset,
 		DataIn=>in2,
@@ -109,7 +105,7 @@ begin
 		Full=>full_srq,
 		Empty=>emp2
 		);
-	bus_res_fif: entity xil_defaultlib.STD_FIFO(Behavioral) port map(
+	bus_res_fif: entity work.STD_FIFO(Behavioral) port map(
 		CLK=>Clock,
 		RST=>reset,
 		DataIn=>in3,

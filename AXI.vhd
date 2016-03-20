@@ -5,35 +5,10 @@
 -- Create Date: 11/09/2015 10:27:30 AM
 -- Design Name: 
 -- Module Name: AXI - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 USE ieee.numeric_std.ALL;
-use std.textio.all;
-use IEEE.std_logic_textio.all;          -- I/O for logic types
-library xil_defaultlib;
-use xil_defaultlib.writefunction.all;
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 entity AXI is
     Port (
@@ -105,7 +80,7 @@ architecture Behavioral of AXI is
  begin  
  
 	
-	snp_res_fif1: entity xil_defaultlib.STD_FIFO(Behavioral) 
+	snp_res_fif1: entity work.STD_FIFO
 	generic map(
         DATA_WIDTH => 52,
         FIFO_DEPTH => 256
@@ -122,7 +97,7 @@ architecture Behavioral of AXI is
 		);
 		
 	
-	mem_res_fif: entity xil_defaultlib.STD_FIFO(Behavioral) 
+	mem_res_fif: entity  work.STD_FIFO(Behavioral) 
 	generic map(
 		DATA_WIDTH => 52,
 		FIFO_DEPTH => 256
@@ -139,7 +114,7 @@ architecture Behavioral of AXI is
 		); 
 		
 	
-	snp_res_fif2: entity xil_defaultlib.STD_FIFO(Behavioral)
+	snp_res_fif2: entity  work.STD_FIFO(Behavioral)
 	generic map(
         DATA_WIDTH => 52,
         FIFO_DEPTH => 256
@@ -155,7 +130,7 @@ architecture Behavioral of AXI is
 		Empty=>emp5
 		);
 		
-	wb_fif1: entity xil_defaultlib.STD_FIFO(Behavioral) port map(
+	wb_fif1: entity  work.STD_FIFO(Behavioral) port map(
 		CLK=>Clock,
 		RST=>reset,
 		DataIn=>in6,
@@ -165,7 +140,7 @@ architecture Behavioral of AXI is
 		Full=>full_wb1,
 		Empty=>emp6
 		); 
-	wb_fif2: entity xil_defaultlib.STD_FIFO(Behavioral) port map(
+	wb_fif2: entity  work.STD_FIFO(Behavioral) port map(
 		CLK=>Clock,
 		RST=>reset,
 		DataIn=>in7,
@@ -361,10 +336,10 @@ architecture Behavioral of AXI is
                     re2 <= '0';
                     if out2(51 downto 51) = "1" then --it;s a hit
                         state := 2;
-                        bus_res2_1 <= out2(50 downto 50);
+                        bus_res2_1 <= out2(50 downto 0);
                     else ---it's a miss
                         state := 3;
-                        tomem1 <= out2(50 downto 50);
+                        tomem1 <= out2(50 downto 0);
                     end if;
                 end if;
             elsif state =2 then
@@ -403,10 +378,10 @@ architecture Behavioral of AXI is
                     re5 <= '0';
                     if out5(51 downto 51) = "1" then --it;s a hit
                         state := 2;
-                        bus_res1_2 <= out5(50 downto 50);
+                        bus_res1_2 <= out5(50 downto 0);
                     else ---it's a miss
                         state := 3;
-                        tomem2 <= out5(50 downto 50);
+                        tomem2 <= out5(50 downto 0);
                     end if;
                 end if;  
             elsif state =2 then
