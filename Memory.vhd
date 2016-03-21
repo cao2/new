@@ -76,6 +76,8 @@ begin
         	address:=to_integer(unsigned(wb_req(47 downto 32)));
         	ROM_array(address) <= wb_req(31 downto 0);
         	wb_ack <= '1';
+        else
+        	wb_ack <= '0';
         end if;
         
     end if;

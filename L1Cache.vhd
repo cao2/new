@@ -170,7 +170,6 @@ begin
 	begin
 		if reset='1' then
 			cpu_res <= (others => '0');
-		
 		elsif rising_edge(Clock) then
 			inp := cpu_res1(50 downto 50) & cpu_res2(50 downto 50);
 			case inp is
@@ -202,6 +201,7 @@ begin
    --deal with cpu request
    cpu_req_p:process (reset, Clock)
         variable nilreq:std_logic_vector(50 downto 0):=(others => '0');
+        variable state: integer :=0;
 	begin
 		if (reset = '1') then
 			-- reset signals
@@ -210,63 +210,48 @@ begin
 			cache_req <= nilreq;
 			tmp_write_req <= nilreq;
 		elsif rising_edge(Clock) then
-		     --cache_req <= nilreq;
-			---reset cpu-res1
-			if ack1 = '1' then --after acknowlegement, reset it to empty request
-        		cpu_res1 <= tmp_cpu_res1;
-        		tmp_cpu_res1 <= (others => '0');
-        	end if;
-        	---reset write_req
-        	if write_ack = '1' then
-				write_req <= tmp_write_req;
-				tmp_write_req <= (others => '0');
-			end if;
-			---send the cache request when it's idle
-			---and reset the tmp cahce req to empty
-			if mem_ack1 ='0' then
-				if tmp_cache_req(50 downto 50) ="1" then
-					cache_req <= tmp_cache_req;
-					tmp_cache_req <= nilreq;
-				else
-				    cache_req <= nilreq;
+		
+			if state =0 then
+				cache_req <= nilreq;
+				if re1 = '0' and emp1 ='0' then
+					re1 <= '1';
+					state := 1;
 				end if;
-			end if;
-			
-			if mem_ack1 = '1' then
-				re1 <= '0'; 
-				--if cache have it, make the return
-				if mem_req1(49 downto 48)="10" and hit1='1' then
-					if write_req(50 downto 50) = "0" then
-						 write_req <= mem_req1;
-					else
-						---temporal write req hold the request that can't be sent now
-						tmp_write_req <= mem_req1;
-            		end if;
-         		end if;
-				---return it back to cpu if it's a cache hit
+				
+			elsif state = 1 then
+				if mem_ack1 = '1' then
+					re1 <= '0';
+					state := 2;
+				end if;
+				
+			elsif state = 2 then
 				if hit1 = '1' then
-					if cpu_res1(50 downto 50) = "0" then
-						cpu_res1 <= '1' & mem_res1(49 downto 0);
+					if mem_req1(49 downto 48) = "10" then
+						write_req <= mem_req1;
+						state := 3;
 					else
-						tmp_cpu_res1 <= '1' & mem_res1(49 downto 0);
+						cpu_res1 <= '1'&mem_res1;
+						state := 4;
 					end if;
+				else
+					cache_req <= '1'&mem_res1;
+					state :=0;
 				end if;
-				---here if the interconnect cache reqeust fifo is full
-				---						I put it in a tmporal variable
-				---						and when next time it's not full, re sent it
-				if hit1 = '0' and full_crq /= '1' then
-					if tmp_cache_req(50 downto 50) ="1"	then
-						cache_req <= tmp_cache_req;
-						tmp_cache_req <= '1' & mem_res1;
-					else
-						cache_req <= '1' & mem_res1;
-					end if;
-				elsif hit1 = '0' and full_crq = '1' then
-					tmp_cache_req <= '1' & mem_res1;
+			elsif state = 3 then
+				if write_ack ='1' then
+					write_req <= nilreq;
+					cpu_res1 <= '1'&mem_res1;
+					state := 4;
 				end if;
-			elsif re1 = '0' and emp1 = '0' then
-				re1 <= '1';
+			elsif state = 4 then
+				if ack1 = '1' then
+					cpu_res1 <= nilreq;
+					state := 0;
+				end if;
 			end if;
+		
+		
+		    
 		end if;
 	end process;
         
