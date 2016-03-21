@@ -492,19 +492,23 @@ architecture Behavioral of AXI is
                 when "01" =>
                     tomem <= '0'&tomem2;
                     mem_ack2 <= '1';
+                    mem_ack1 <= '0';
                 when "10" =>
                     tomem <= '1'&tomem1;
                     mem_ack1 <= '1';
+                    mem_ack2 <= '0';
                 when "11" =>
                     if shifter = '0' then
                         tomem <= '0'&tomem2;
                     	mem_ack2 <= '1';
+                    	mem_ack1 <= '0';
                     else
                         tomem <= '1'&tomem1;
                     	mem_ack1 <= '1';
+                    	mem_ack2 <= '0';
                     end if;
                 when others =>
-                    tomem <= '1' & nilreq;
+                    tomem <= '0' & nilreq;
             end case;
         end if;
     end process;    
