@@ -70,7 +70,7 @@ begin
         first_time <= 0;
      elsif (rising_edge(Clock)) then
        
-        if (first_time <50) then
+        if (first_time <1) then
            first_time <= first_time+1;
            rand1 := selection(2);
            rand2 :=selection(2**15-1,16);
