@@ -54,7 +54,6 @@ architecture Behavioral of AXI is
     signal memory : memory_type :=(others => (others => '0'));   --memory for queue.
     signal readptr,writeptr : integer range 0 to 31 := 0;  --read and write pointers.begin
     
-    signal statetry: integer :=0;
     signal in1,in4,in6,in7: std_logic_vector(50 downto 0);
     signal in2, out2,in5,out5,in3,out3: std_logic_vector(51 downto 0);
     signal we1,we2,we3,we4,we5,we6,we7,re7,re1,re2,re3,re4,re5,re6: std_logic:='0';
@@ -331,6 +330,7 @@ architecture Behavioral of AXI is
                     re2 <= '1';
                     state := 1;
                 end if;
+                
             elsif state =1 then
                 if out2(50 downto 50) = "1" then
                     re2 <= '0';
@@ -347,6 +347,7 @@ architecture Behavioral of AXI is
                     bus_res2_1 <= nilreq;
                     state := 0;
                 end if;
+                
             elsif state = 3 then
                 if mem_ack1 = '1' then
                     tomem1 <= nilreq;
@@ -360,7 +361,7 @@ architecture Behavioral of AXI is
      
     snp_res2_p: process(reset, Clock)
         variable nilreq:std_logic_vector(50 downto 0):=(others => '0');
-        --variable state: integer :=0;
+        variable state: integer :=0;
     begin
         if reset = '1' then
             re5 <= '0';
@@ -368,33 +369,33 @@ architecture Behavioral of AXI is
             tomem2 <= nilreq;
             --tmp_brs1_2 <= nilreq;
             --tmp_mem2 <=nilreq;
-            statetry <= 0;
+            state := 0;
         elsif rising_edge(Clock) then
-            if statetry =0 then
+            if state =0 then
                 if re5 ='0' and emp5 ='0' then
                     re5 <= '1';
-                    statetry <= 1;
+                    state := 1;
                 end if;
-            elsif statetry =1 then
+            elsif state =1 then
                 if out5(50 downto 50) = "1" then
                     re5 <= '0';
                     if out5(51 downto 51) = "1" then --it;s a hit
-                        statetry <= 2;
+                        state := 2;
                         bus_res1_2 <= out5(50 downto 0);
                     else ---it's a miss
                         tomem2 <= out5(50 downto 0);
-                        statetry <= 3;
+                        state := 3;
                     end if;
                 end if;  
-            elsif statetry =2 then
+            elsif state =2 then
                 if brs1_ack2 = '1' then
                     bus_res1_2 <= nilreq;
-                    statetry <= 0;
+                    state := 0;
                 end if;    
-            elsif statetry =3 then
+            elsif state =3 then
                 if mem_ack2 = '1' then
                     tomem2 <= nilreq;
-                    statetry <= 0;
+                    state := 0;
                 end if;
             end if;
         end if;

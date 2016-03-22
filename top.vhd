@@ -76,6 +76,7 @@ clk_gen : process
        variable coma: string(2 downto 1) := ", ";
    begin
    -- Generate a clock cycle
+   
    loop
      	Clock <= '0';
      	wait for 2 ps;
