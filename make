@@ -7,4 +7,4 @@ ghdl -a L1Cache.vhd
 ghdl -a --ieee=synopsys top.vhd
 
 ghdl -e --ieee=synopsys top
-./top --stop-time=300ps
+./top --stop-time=300ps --wave=waveform.ghw 
