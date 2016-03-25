@@ -376,6 +376,7 @@ architecture Behavioral of AXI is
                     re5 <= '1';
                     state := 1;
                 end if;
+                
             elsif state =1 then
                 if out5(50 downto 50) = "1" then
                     re5 <= '0';
@@ -387,11 +388,13 @@ architecture Behavioral of AXI is
                         state := 3;
                     end if;
                 end if;  
+                
             elsif state =2 then
                 if brs1_ack2 = '1' then
                     bus_res1_2 <= nilreq;
                     state := 0;
-                end if;    
+                end if; 
+                   
             elsif state =3 then
                 if mem_ack2 = '1' then
                     tomem2 <= nilreq;
@@ -495,22 +498,29 @@ architecture Behavioral of AXI is
                     mem_ack1 <= '0';
                     mem_ack2 <= '0';
                 when "01" =>
+                	if mem_ack2 = '0' then
                     tomem <= '0'&tomem2;
                     mem_ack2 <= '1';
                     mem_ack1 <= '0';
+                    end if;
                 when "10" =>
+                	if mem_ack1 ='0' then
                     tomem <= '1'&tomem1;
                     mem_ack1 <= '1';
                     mem_ack2 <= '0';
+                    end if;
                 when "11" =>
-                    if shifter = '0' then
+                    if shifter = '0' and  mem_ack2 ='0' then
+                    
                         tomem <= '0'&tomem2;
                     	mem_ack2 <= '1';
                     	mem_ack1 <= '0';
-                    else
+                    	shifter := '1';
+                    elsif  shifter = '1' and mem_ack1 ='0' then
                         tomem <= '1'&tomem1;
                     	mem_ack1 <= '1';
                     	mem_ack2 <= '0';
+                    	shifter := '0';
                     end if;
                 when others =>
                     tomem <= '0' & nilreq;
