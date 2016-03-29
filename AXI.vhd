@@ -206,8 +206,10 @@ architecture Behavioral of AXI is
     				stage :=1;
     			end if;
     	   elsif stage = 1 then
+    	   		re3 <= '0';
     			if out3(50 downto 50) = "1" then
     				
+    				stage :=2;
     				---response for cpu1
     				if out3(51 downto 51) ="1"  then
     					bus_res1_1 <= out3(50 downto 0);
@@ -217,8 +219,7 @@ architecture Behavioral of AXI is
     					bus_res2_2 <= out3(50 downto 0);
     					cpu1 := '0';
     				end if;
-    				re3 <= '0';
-    				stage :=2;
+    				
     			end if;
     		elsif stage = 2 then
     			if cpu1 ='1' and brs1_ack1 = '1' then
@@ -332,8 +333,9 @@ architecture Behavioral of AXI is
                 end if;
                 
             elsif state =1 then
+            	re2 <= '0';
                 if out2(50 downto 50) = "1" then
-                    re2 <= '0';
+                    
                     if out2(51 downto 51) = "1" then --it;s a hit
                         state := 2;
                         bus_res2_1 <= out2(50 downto 0);
@@ -378,8 +380,9 @@ architecture Behavioral of AXI is
                 end if;
                 
             elsif state =1 then
+            	re5 <= '0';
                 if out5(50 downto 50) = "1" then
-                    re5 <= '0';
+                    
                     if out5(51 downto 51) = "1" then --it;s a hit
                         state := 2;
                         bus_res1_2 <= out5(50 downto 0);
@@ -405,7 +408,7 @@ architecture Behavioral of AXI is
     end process;
  
      --bus_res2 arbitor
-    brs2_arbitor: process(reset,Clock)
+    brs2_arbitor: process(reset,bus_res2_1, bus_res2_2)
         variable nilreq : std_logic_vector(50 downto 0):=(others => '0');
         variable cmd: std_logic_vector( 1 downto 0);
         variable shifter: std_logic := '0';
@@ -413,7 +416,7 @@ architecture Behavioral of AXI is
         if reset ='1'  then
             brs2_ack1 <= '0';
             brs2_ack2 <= '0';
-        elsif rising_edge(Clock) then
+        else
             brs2_ack1 <= '0';
             brs2_ack2 <= '0';
             bus_res2 <= nilreq;
@@ -443,7 +446,7 @@ architecture Behavioral of AXI is
     end process; 
 
     --bus_res1 arbitor
-    brs1_arbitor: process(reset,Clock)
+    brs1_arbitor: process(reset,bus_res1_1, bus_res1_2)
         variable nilreq : std_logic_vector(50 downto 0):=(others => '0');
         variable cmd: std_logic_vector( 1 downto 0);
         variable shifter: std_logic := '0';
@@ -452,7 +455,7 @@ architecture Behavioral of AXI is
             brs1_ack1 <= '0';
             brs1_ack2 <= '0';
 
-        elsif rising_edge(Clock) then
+        else
         	brs1_ack1 <= '0';
             brs1_ack2 <= '0';
             cmd:= bus_res1_1(50 downto 50)& bus_res1_2(50 downto 50);
@@ -481,7 +484,7 @@ architecture Behavioral of AXI is
     end process; 
         
     --tomem aribitor
-    tomem_arbitor: process (reset, Clock)
+    tomem_arbitor: process (reset,tomem1,tomem2)
         variable nilreq : std_logic_vector(50 downto 0):=(others => '0');
         variable cmd: std_logic_vector( 1 downto 0);
         variable shifter: std_logic := '0';
@@ -490,7 +493,7 @@ architecture Behavioral of AXI is
         	mem_ack1 <= '0';
         	mem_ack2 <= '0';
         	tomem <= '0'& nilreq;
-        elsif rising_edge(Clock) then
+        else
         	cmd:= tomem1(50 downto 50)& tomem2(50 downto 50);
             case cmd is
                 when "00" =>   
@@ -511,7 +514,6 @@ architecture Behavioral of AXI is
                     end if;
                 when "11" =>
                     if shifter = '0' and  mem_ack2 ='0' then
-                    
                         tomem <= '0'&tomem2;
                     	mem_ack2 <= '1';
                     	mem_ack1 <= '0';
@@ -531,7 +533,7 @@ architecture Behavioral of AXI is
     
    
     --write back  aribitor
-    wb_arbitor: process (reset, Clock)
+    wb_arbitor: process (reset,mem_wb1,mem_wb2)
         variable nilreq : std_logic_vector(50 downto 0):=(others => '0');
         variable cmd: std_logic_vector( 1 downto 0);
         variable shifter: std_logic := '0';
@@ -539,7 +541,7 @@ architecture Behavioral of AXI is
         if reset = '1' then
         	wb_ack1 <= '0';
         	wb_ack2 <= '0';
-        elsif rising_edge(Clock) then
+        else
         	wb_ack1 <= '0';
         	wb_ack2 <= '0';
         	cmd:= mem_wb1(50 downto 50)& mem_wb2(50 downto 50);

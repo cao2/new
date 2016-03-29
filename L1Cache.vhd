@@ -164,13 +164,13 @@ begin
 	end process;
 
 	---arbitor for sending out cpu response
-	cpu_res_arbitor: process (reset, Clock)
+	cpu_res_arbitor: process (reset, cpu_res1,cpu_res2)
 		variable shifter : boolean :=true;
 		variable inp: std_logic_vector(1 downto 0);
 	begin
 		if reset='1' then
 			cpu_res <= (others => '0');
-		elsif rising_edge(Clock) then
+		else
 			inp := cpu_res1(50 downto 50) & cpu_res2(50 downto 50);
 			case inp is
 				when "00" => --do nothing
@@ -219,24 +219,23 @@ begin
 				end if;
 				
 			elsif state = 1 then
+				re1 <= '0';
 				if mem_ack1 = '1' then
-					re1 <= '0';
-					state := 2;
+					if hit1 = '1' then
+						if mem_req1(49 downto 48) = "10" then
+							write_req <= mem_req1;
+							state := 3;
+						else
+							cpu_res1 <= '1'&mem_res1;
+							state := 4;
+						end if;
+					else
+						cache_req <= '1'&mem_res1;
+						state :=0;
+					end if;
 				end if;
 				
-			elsif state = 2 then
-				if hit1 = '1' then
-					if mem_req1(49 downto 48) = "10" then
-						write_req <= mem_req1;
-						state := 3;
-					else
-						cpu_res1 <= '1'&mem_res1;
-						state := 4;
-					end if;
-				else
-					cache_req <= '1'&mem_res1;
-					state :=0;
-				end if;
+				
 			elsif state = 3 then
 				if write_ack ='1' then
 					write_req <= nilreq;
@@ -276,8 +275,9 @@ begin
 			         
 			     end if;
 			elsif state =1 then
+				re2 <= '0';
 			     if mem_ack2 = '1' then
-			         re2 <= '0';
+			         
 			         state := 2;
 			     end if;
 			elsif state =2 then
@@ -308,8 +308,9 @@ begin
 		              state := 1;
 		          end if;
 		    elsif state =1 then
+		    	   re3 <= '0';
 		          if upd_ack ='1' then
-		              re3 <= '0';
+		             
 		              cpu_res2 <= '1'&upd_res;
 		              state :=2;
 		          end if;

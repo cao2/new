@@ -63,26 +63,31 @@ begin
      variable rand2: std_logic_vector(15 downto 0):=selection(2**15-1,16);
      variable rand3: std_logic_vector(31 downto 0):=selection(2**15-1,32);
      variable new_req : std_logic_vector(50 downto 0);
-
+	 variable blk: boolean :=true;
     begin
      if reset = '1' then
         new_req := (others => '0');
         first_time <= 0;
+        blk := true;
      elsif (rising_edge(Clock)) then
        
-        if (first_time <1) then
+        if (first_time <2 and blk = true) then
+           blk:=false;
            first_time <= first_time+1;
            rand1 := selection(2);
            rand2 :=selection(2**15-1,16);
            rand3 :=selection(2**15-1,32);
-     	  if (full_c/='1') then
+     	   if (full_c/='1') then
           	if (rand1 = 1) then---read
             	new_req := "101" & rand2 & rand3;
           	elsif (rand1 =2) then
             	new_req := "110"& rand2 & rand3;
           	end if;
       	--else if the cache buffer is full, don't send anything
-       	 end if;
+       	   end if;
+       	elsif (first_time <2 and blk = false) then
+       	 	new_req := (others => '0');
+       		blk := true;
        	else
        	    new_req := (others => '0');
        	end if;
