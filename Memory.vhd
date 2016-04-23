@@ -1,36 +1,8 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 11/01/2015 11:10:38 PM
--- Design Name: 
--- Module Name: Memory - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 USE ieee.numeric_std.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+use work.nondeterminism.all;
 
 entity Memory is
     Port (  Clock: in std_logic;
@@ -44,7 +16,7 @@ entity Memory is
 end Memory;
 
 architecture Behavioral of Memory is
-     type rom_type is array (2**16-1 downto 0) of std_logic_vector (31 downto 0);     
+     type rom_type is array (2**20-1 downto 0) of std_logic_vector (31 downto 0);     
      signal ROM_array : rom_type:= (others=> (others=>'0'));
 
 begin
@@ -58,6 +30,8 @@ begin
     variable flag: boolean:=false;
     variable nada: std_logic_vector(51 downto 0) :=(others=>'0');
     variable bo :boolean;
+    variable nilmem: std_logic_vector(31 downto 0) := (others=>'0');
+    variable tpmem: std_logic_vector(31 downto 0):= selection(2**31-1,32);
     begin
     if reset ='1' then
         res<=(others => '0');
@@ -67,7 +41,13 @@ begin
        -- res<=nada;
         if req(50 downto 50) = "1" then
         	address:=to_integer(unsigned(req(47 downto 32)));
-        	res <= req(51 downto 32) & ROM_array(address);
+        	if (ROM_array(address)=nilmem and req(49 downto 48)="01") then
+        		tpmem := selection(2**31-1,32);
+        	elsif (ROM_array(address)=nilmem and req(49 downto 48)="10") then
+        		tpmem := req(31 downto 0);
+        	end if;
+        	ROM_array(address) <= tpmem;
+        	res <= req(51 downto 32) & tpmem;
         else
             res <= (others => '0');
         end if;

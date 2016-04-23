@@ -1,0 +1,32 @@
+[*]
+[*] GTKWave Analyzer v3.3.68 (w)1999-2016 BSI
+[*] Fri Apr  1 15:20:34 2016
+[*]
+[dumpfile] "/Users/cao2/Desktop/new/new.ghw"
+[dumpfile_mtime] "Fri Apr  1 15:19:20 2016"
+[dumpfile_size] 8849394
+[savefile] "/Users/cao2/Desktop/new/arbiter.gtkw"
+[timestart] 117940
+[size] 1446 600
+[pos] 75 65
+*-14.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.top.
+[sst_width] 193
+[signals_width] 133
+[sst_expanded] 1
+[sst_vpaned_height] 168
+@28
+top.top.clock
+@22
+#{top.top.interconnect.tomem1[50:0]} top.top.interconnect.tomem1[50] top.top.interconnect.tomem1[49] top.top.interconnect.tomem1[48] top.top.interconnect.tomem1[47] top.top.interconnect.tomem1[46] top.top.interconnect.tomem1[45] top.top.interconnect.tomem1[44] top.top.interconnect.tomem1[43] top.top.interconnect.tomem1[42] top.top.interconnect.tomem1[41] top.top.interconnect.tomem1[40] top.top.interconnect.tomem1[39] top.top.interconnect.tomem1[38] top.top.interconnect.tomem1[37] top.top.interconnect.tomem1[36] top.top.interconnect.tomem1[35] top.top.interconnect.tomem1[34] top.top.interconnect.tomem1[33] top.top.interconnect.tomem1[32] top.top.interconnect.tomem1[31] top.top.interconnect.tomem1[30] top.top.interconnect.tomem1[29] top.top.interconnect.tomem1[28] top.top.interconnect.tomem1[27] top.top.interconnect.tomem1[26] top.top.interconnect.tomem1[25] top.top.interconnect.tomem1[24] top.top.interconnect.tomem1[23] top.top.interconnect.tomem1[22] top.top.interconnect.tomem1[21] top.top.interconnect.tomem1[20] top.top.interconnect.tomem1[19] top.top.interconnect.tomem1[18] top.top.interconnect.tomem1[17] top.top.interconnect.tomem1[16] top.top.interconnect.tomem1[15] top.top.interconnect.tomem1[14] top.top.interconnect.tomem1[13] top.top.interconnect.tomem1[12] top.top.interconnect.tomem1[11] top.top.interconnect.tomem1[10] top.top.interconnect.tomem1[9] top.top.interconnect.tomem1[8] top.top.interconnect.tomem1[7] top.top.interconnect.tomem1[6] top.top.interconnect.tomem1[5] top.top.interconnect.tomem1[4] top.top.interconnect.tomem1[3] top.top.interconnect.tomem1[2] top.top.interconnect.tomem1[1] top.top.interconnect.tomem1[0]
+@28
+top.top.interconnect.mem_ack1
+@22
+#{top.top.interconnect.tomem2[50:0]} top.top.interconnect.tomem2[50] top.top.interconnect.tomem2[49] top.top.interconnect.tomem2[48] top.top.interconnect.tomem2[47] top.top.interconnect.tomem2[46] top.top.interconnect.tomem2[45] top.top.interconnect.tomem2[44] top.top.interconnect.tomem2[43] top.top.interconnect.tomem2[42] top.top.interconnect.tomem2[41] top.top.interconnect.tomem2[40] top.top.interconnect.tomem2[39] top.top.interconnect.tomem2[38] top.top.interconnect.tomem2[37] top.top.interconnect.tomem2[36] top.top.interconnect.tomem2[35] top.top.interconnect.tomem2[34] top.top.interconnect.tomem2[33] top.top.interconnect.tomem2[32] top.top.interconnect.tomem2[31] top.top.interconnect.tomem2[30] top.top.interconnect.tomem2[29] top.top.interconnect.tomem2[28] top.top.interconnect.tomem2[27] top.top.interconnect.tomem2[26] top.top.interconnect.tomem2[25] top.top.interconnect.tomem2[24] top.top.interconnect.tomem2[23] top.top.interconnect.tomem2[22] top.top.interconnect.tomem2[21] top.top.interconnect.tomem2[20] top.top.interconnect.tomem2[19] top.top.interconnect.tomem2[18] top.top.interconnect.tomem2[17] top.top.interconnect.tomem2[16] top.top.interconnect.tomem2[15] top.top.interconnect.tomem2[14] top.top.interconnect.tomem2[13] top.top.interconnect.tomem2[12] top.top.interconnect.tomem2[11] top.top.interconnect.tomem2[10] top.top.interconnect.tomem2[9] top.top.interconnect.tomem2[8] top.top.interconnect.tomem2[7] top.top.interconnect.tomem2[6] top.top.interconnect.tomem2[5] top.top.interconnect.tomem2[4] top.top.interconnect.tomem2[3] top.top.interconnect.tomem2[2] top.top.interconnect.tomem2[1] top.top.interconnect.tomem2[0]
+@28
+top.top.interconnect.mem_ack2
+@22
+#{top.top.tomem[51:0]} top.top.tomem[51] top.top.tomem[50] top.top.tomem[49] top.top.tomem[48] top.top.tomem[47] top.top.tomem[46] top.top.tomem[45] top.top.tomem[44] top.top.tomem[43] top.top.tomem[42] top.top.tomem[41] top.top.tomem[40] top.top.tomem[39] top.top.tomem[38] top.top.tomem[37] top.top.tomem[36] top.top.tomem[35] top.top.tomem[34] top.top.tomem[33] top.top.tomem[32] top.top.tomem[31] top.top.tomem[30] top.top.tomem[29] top.top.tomem[28] top.top.tomem[27] top.top.tomem[26] top.top.tomem[25] top.top.tomem[24] top.top.tomem[23] top.top.tomem[22] top.top.tomem[21] top.top.tomem[20] top.top.tomem[19] top.top.tomem[18] top.top.tomem[17] top.top.tomem[16] top.top.tomem[15] top.top.tomem[14] top.top.tomem[13] top.top.tomem[12] top.top.tomem[11] top.top.tomem[10] top.top.tomem[9] top.top.tomem[8] top.top.tomem[7] top.top.tomem[6] top.top.tomem[5] top.top.tomem[4] top.top.tomem[3] top.top.tomem[2] top.top.tomem[1] top.top.tomem[0]
+[pattern_trace] 1
+[pattern_trace] 0

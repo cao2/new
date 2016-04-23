@@ -74,7 +74,9 @@ architecture Behavioral of AXI is
     
     signal wb_ack1, wb_ack2 : std_logic;
     signal mem_wb1, mem_wb2, tmp_mem_wb1, tmp_mem_wb2 : std_logic_vector (50 downto 0):=(others => '0');
-	
+    
+    --state information of power
+	signal gfxpoweron: std_logic:='0';
 	
  begin  
  
@@ -151,8 +153,46 @@ architecture Behavioral of AXI is
 		); 
  
    
-        
-        
+    tomem_arbitor: entity work.arbiter(Behavioral) port map(
+    	clock => Clock,
+        reset => reset,
+        din1 => tomem1,
+        ack1 => mem_ack1,
+        din2 => tomem2,
+        ack2 => mem_ack2,
+        dout => tomem
+    );
+    
+    brs2_arbitor: entity work.arbiter2(Behavioral) port map(
+    	clock => Clock,
+        reset => reset,
+        din1 => bus_res2_1,
+        ack1 => brs2_ack1,
+        din2 => bus_res2_2,
+        ack2 => brs2_ack2,
+        dout => bus_res2 
+    );
+    
+    brs1_arbitor: entity work.arbiter2(Behavioral) port map(
+    	clock => Clock,
+        reset => reset,
+        din1 => bus_res1_1,
+        ack1 => brs1_ack1,
+        din2 => bus_res1_2,
+        ack2 => brs1_ack2,
+        dout => bus_res1
+    );
+    
+    wb_arbitor: entity work.arbiter2(Behavioral) port map(
+    	clock => Clock,
+        reset => reset,
+        din1 => mem_wb1,
+        ack1 => wb_ack1,
+        din2 => mem_wb2,
+        ack2 => wb_ack2,
+        dout => mem_wb 
+    );
+   
     snp_res1_fifo: process(reset,Clock)
 	   begin
         	if reset='1' then
@@ -187,9 +227,101 @@ architecture Behavioral of AXI is
              end if;
 	end process;
 	
+	wb_req1_fifo: process(reset,Clock)
+	   begin	  
+        	if reset='1' then
+        		we6<='0';
+            elsif rising_edge(Clock) then
+				if(wb_req1(50 downto 50)="1") then
+					in6<=wb_req1;
+					we6<='1';
+				else
+					we6<='0';
+				end if;	
+			end if;
+	end process;
+
+	wb_req2_fifo: process(reset,Clock)
+	begin
+        if reset='1' then
+        	we7<='0';
+        elsif rising_edge(Clock) then
+			if(wb_req2(50 downto 50)="1") then
+				in7<=wb_req2;
+				we7<='1';
+			else
+				we7<='0';
+			end if;
+		end if;	
+	end process;
 	
-        ----stcucked here
-	    
+		
+		
+	---write_back process
+	wb_1_p: process(reset, Clock)
+		variable nilreq:std_logic_vector(50 downto 0):=(others => '0');
+		variable state:integer;
+	begin
+		if reset= '1' then
+    		mem_wb1 <= nilreq;
+    		state := 0;
+    		
+    	elsif rising_edge(Clock) then
+    		if state = 0 then
+    			if re6 ='0' and emp6 ='0' then
+    				re6 <= '1';
+    				state :=1;
+    			end if;
+    		elsif state =1 then
+    			re6 <='0';
+    			if out6(50 downto 50)="1" then
+    				state:=2;
+    				mem_wb1 <= out6;
+    			end if;
+    			
+    		elsif state = 2 then
+    			if wb_ack1 = '1' then
+    				mem_wb1 <= nilreq;
+    				state :=0;
+    			end if;
+    		end if;
+    		
+    	end if;
+	end process;
+	
+	---write_back process
+	wb_2_p: process(reset, Clock)
+		variable nilreq:std_logic_vector(50 downto 0):=(others => '0');
+		variable state:integer;
+	begin
+		if reset= '1' then
+    		mem_wb2 <= nilreq;
+    		state := 0;
+    		
+    	elsif rising_edge(Clock) then
+    		if state = 0 then
+    			if re7 ='0' and emp7 ='0' then
+    				re7 <= '1';
+    				state :=1;
+    			end if;
+    		elsif state =1 then
+    			re7 <='0';
+    			if out7(50 downto 50)="1" then
+    				state:=2;
+    				mem_wb2 <= out7;
+    			end if;
+    			
+    		elsif state = 2 then
+    			if wb_ack2 = '1' then
+    				mem_wb2 <= nilreq;
+    				state :=0;
+    			end if;
+    		end if;
+    		
+    	end if;
+	end process;	    
+	
+	
     ---mem_res process
     mem_res_p: process(reset,Clock)
     	variable nilreq:std_logic_vector(50 downto 0):=(others => '0');
@@ -208,10 +340,9 @@ architecture Behavioral of AXI is
     	   elsif stage = 1 then
     	   		re3 <= '0';
     			if out3(50 downto 50) = "1" then
-    				
     				stage :=2;
     				---response for cpu1
-    				if out3(51 downto 51) ="1"  then
+    				if out3(51 downto 51) ="0"  then
     					bus_res1_1 <= out3(50 downto 0);
     					cpu1 := '1';
     				---response for cpu2
@@ -253,35 +384,7 @@ architecture Behavioral of AXI is
 			end if;	
 	end process;
 	
-	wb_req1_fifo: process(reset,Clock)
-	   begin	  
-        	if reset='1' then
-        		we6<='0';
-            elsif rising_edge(Clock) then
-				if(wb_req1(50 downto 50)="1") then
-					in6<=wb_req1;
-					we6<='1';
-				else
-					we6<='0';
-				end if;	
-			end if;
-	end process;
 
-	wb_req2_fifo: process(reset,Clock)
-	begin
-        if reset='1' then
-        	we6<='0';
-        elsif rising_edge(Clock) then
-			if(wb_req2(50 downto 50)="1") then
-				in7<=wb_req2;
-				we7<='1';
-			else
-				we7<='0';
-			end if;
-		end if;	
-	end process;
-	
-		
 	---deal with cache request
     cache_req1_p:process(reset,Clock)
         variable nilreq:std_logic_vector(50 downto 0):=(others => '0');
@@ -325,7 +428,6 @@ architecture Behavioral of AXI is
             ---tmp_brs2_1 <= nilreq;
             ---tmp_mem1 <=nilreq;
         elsif rising_edge(Clock) then
-        
             if state =0 then
                 if re2 ='0' and emp2 ='0' then
                     re2 <= '1';
@@ -378,7 +480,6 @@ architecture Behavioral of AXI is
                     re5 <= '1';
                     state := 1;
                 end if;
-                
             elsif state =1 then
             	re5 <= '0';
                 if out5(50 downto 50) = "1" then
@@ -405,167 +506,7 @@ architecture Behavioral of AXI is
                 end if;
             end if;
         end if;
-    end process;
- 
-     --bus_res2 arbitor
-    brs2_arbitor: process(reset,bus_res2_1, bus_res2_2)
-        variable nilreq : std_logic_vector(50 downto 0):=(others => '0');
-        variable cmd: std_logic_vector( 1 downto 0);
-        variable shifter: std_logic := '0';
-    begin  
-        if reset ='1'  then
-            brs2_ack1 <= '0';
-            brs2_ack2 <= '0';
-        else
-            brs2_ack1 <= '0';
-            brs2_ack2 <= '0';
-            bus_res2 <= nilreq;
-            cmd:= bus_res2_1(50 downto 50)& bus_res2_2(50 downto 50);
-            case cmd is
-                when "00" =>
-                    bus_res2 <= nilreq;
-                when "01" =>
-                    bus_res2 <= bus_res2_2(50 downto 0);
-                    brs2_ack2 <= '1';
-                when "10" =>
-                    bus_res2 <= bus_res2_1;
-                    brs2_ack1 <= '1';
-                when "11" =>
-                    if shifter = '0' then
-                        shifter := '1';
-                        bus_res2 <= bus_res2_2;
-                        brs2_ack2 <= '1';
-                    else
-                        shifter := '0';
-                        bus_res2 <= bus_res2_1;
-                        brs2_ack1 <= '1';
-                    end if;
-                when others =>
-            end case;
-        end if;
-    end process; 
-
-    --bus_res1 arbitor
-    brs1_arbitor: process(reset,bus_res1_1, bus_res1_2)
-        variable nilreq : std_logic_vector(50 downto 0):=(others => '0');
-        variable cmd: std_logic_vector( 1 downto 0);
-        variable shifter: std_logic := '0';
-    begin  
-        if reset ='1'  then
-            brs1_ack1 <= '0';
-            brs1_ack2 <= '0';
-
-        else
-        	brs1_ack1 <= '0';
-            brs1_ack2 <= '0';
-            cmd:= bus_res1_1(50 downto 50)& bus_res1_2(50 downto 50);
-            case cmd is
-                when "00" =>
-                    bus_res1 <= nilreq;
-                when "01" =>
-                    bus_res1 <= bus_res1_2;
-                    brs1_ack2 <= '1';
-                when "10" =>
-                    bus_res1 <= bus_res1_1;
-                    brs1_ack1 <= '1';
-                when "11" =>
-                    if shifter = '0' then
-                        shifter := '1';
-                        bus_res1 <= bus_res1_2;
-                        brs1_ack2 <= '1';
-                    else
-                        shifter := '0';
-                        bus_res1 <= bus_res1_1;
-                        brs1_ack1 <= '1';
-                    end if;
-                when others =>
-            end case;
-        end if;
-    end process; 
-        
-    --tomem aribitor
-    tomem_arbitor: process (reset,tomem1,tomem2)
-        variable nilreq : std_logic_vector(50 downto 0):=(others => '0');
-        variable cmd: std_logic_vector( 1 downto 0);
-        variable shifter: std_logic := '0';
-    begin
-        if reset = '1' then
-        	mem_ack1 <= '0';
-        	mem_ack2 <= '0';
-        	tomem <= '0'& nilreq;
-        else
-        	cmd:= tomem1(50 downto 50)& tomem2(50 downto 50);
-            case cmd is
-                when "00" =>   
-                    tomem <= '0'&nilreq;
-                    mem_ack1 <= '0';
-                    mem_ack2 <= '0';
-                when "01" =>
-                	if mem_ack2 = '0' then
-                    tomem <= '0'&tomem2;
-                    mem_ack2 <= '1';
-                    mem_ack1 <= '0';
-                    end if;
-                when "10" =>
-                	if mem_ack1 ='0' then
-                    tomem <= '1'&tomem1;
-                    mem_ack1 <= '1';
-                    mem_ack2 <= '0';
-                    end if;
-                when "11" =>
-                    if shifter = '0' and  mem_ack2 ='0' then
-                        tomem <= '0'&tomem2;
-                    	mem_ack2 <= '1';
-                    	mem_ack1 <= '0';
-                    	shifter := '1';
-                    elsif  shifter = '1' and mem_ack1 ='0' then
-                        tomem <= '1'&tomem1;
-                    	mem_ack1 <= '1';
-                    	mem_ack2 <= '0';
-                    	shifter := '0';
-                    end if;
-                when others =>
-                    tomem <= '0' & nilreq;
-            end case;
-        end if;
-    end process;    
-    
-    
-   
-    --write back  aribitor
-    wb_arbitor: process (reset,mem_wb1,mem_wb2)
-        variable nilreq : std_logic_vector(50 downto 0):=(others => '0');
-        variable cmd: std_logic_vector( 1 downto 0);
-        variable shifter: std_logic := '0';
-    begin
-        if reset = '1' then
-        	wb_ack1 <= '0';
-        	wb_ack2 <= '0';
-        else
-        	wb_ack1 <= '0';
-        	wb_ack2 <= '0';
-        	cmd:= mem_wb1(50 downto 50)& mem_wb2(50 downto 50);
-            case cmd is
-                when "00" =>
-                    mem_wb <= nilreq;
-                when "01" =>
-                    mem_wb <= mem_wb2;
-                    wb_ack2 <= '1';
-                when "10" =>
-                    mem_wb <= mem_wb1;
-                    wb_ack1 <= '1';
-                when "11" =>
-                    if shifter = '0' then
-                        mem_wb <= mem_wb2;
-                    	wb_ack2 <= '1';
-                    else
-                        mem_wb <= mem_wb1;
-                    	wb_ack1 <= '1';
-                    end if;
-                when others =>
-            end case;
-        end if;
-    end process;    
+    end process;  
         
         
 end Behavioral;

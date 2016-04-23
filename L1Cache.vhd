@@ -1,23 +1,3 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 10/25/2015 10:15:11 PM
--- Design Name: 
--- Module Name: L1Cache - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -44,7 +24,7 @@ entity L1Cache is
            --10: write response
            --11: fifo full response
            cpu_res : out STD_LOGIC_VECTOR(50 downto 0):= (others => '0');
-           --01: read response
+           --01: read response 
            --10: write response
            --11: fifo full response
            snoop_hit : out std_logic;
@@ -80,9 +60,9 @@ architecture Behavioral of L1Cache is
 	signal ack1, ack2: std_logic;
 	signal wb_req_c, wb_res_c:integer:=1;
 	
-	
 	signal prc:std_logic_vector(1 downto 0);
-	signal tmp_write_req, tmp_cpu_res1, tmp_cpu_res2, tmp_cache_req: std_logic_vector(50 downto 0):=(others => '0');
+	signal tmp_snp_res, tmp_cpu_res1: std_logic_vector(50 downto 0):=(others => '0');
+	signal tmp_hit : std_logic;
 	
 begin
 	cpu_req_fif: entity work.STD_FIFO(Behavioral) port map(
@@ -115,6 +95,15 @@ begin
 		Full=>full_brs,
 		Empty=>emp3
 		);
+	 cpu_res_arbitor: entity work.arbiter2(Behavioral) port map(
+    	clock => Clock,
+        reset => reset,
+        din1 => cpu_res1,
+        ack1 => ack1,
+        din2 => cpu_res2,
+        ack2 => ack2,
+        dout => cpu_res 
+    );
 	
 	-- Store CPU requests into fifo	
 	cpu_req_fifo: process (Clock)      
@@ -163,38 +152,7 @@ begin
 		end if;
 	end process;
 
-	---arbitor for sending out cpu response
-	cpu_res_arbitor: process (reset, cpu_res1,cpu_res2)
-		variable shifter : boolean :=true;
-		variable inp: std_logic_vector(1 downto 0);
-	begin
-		if reset='1' then
-			cpu_res <= (others => '0');
-		else
-			inp := cpu_res1(50 downto 50) & cpu_res2(50 downto 50);
-			case inp is
-				when "00" => --do nothing
-				    cpu_res <= (others => '0');
-				when "01" =>
-					cpu_res <= cpu_res2;
-					ack2 <= '1';
-				when "10" =>
-					cpu_res <= cpu_res1;
-					ack1 <= '1';
-				when "11" =>
-					if shifter = true then
-						shifter := false;
-						cpu_res <= cpu_res1;
-						ack1 <= '1';
-					else
-						shifter := true;
-						cpu_res <= cpu_res2;
-						ack2 <= '1';
-					end if;
-				when others =>
-			end case;
-		end if;
-	end process;	
+	
 	
 -------prblem:
 --------it seems when it send cache request, the request is never reset back to empty
@@ -208,7 +166,7 @@ begin
 			cpu_res1 <= nilreq;
 			write_req <= nilreq;
 			cache_req <= nilreq;
-			tmp_write_req <= nilreq;
+			--tmp_write_req <= nilreq;
 		elsif rising_edge(Clock) then
 		
 			if state =0 then
@@ -222,8 +180,9 @@ begin
 				re1 <= '0';
 				if mem_ack1 = '1' then
 					if hit1 = '1' then
-						if mem_req1(49 downto 48) = "10" then
-							write_req <= mem_req1;
+						if mem_res1(49 downto 48) = "10" then
+							write_req <= '1'&mem_res1;
+							tmp_cpu_res1 <= '1'&mem_res1;
 							state := 3;
 						else
 							cpu_res1 <= '1'&mem_res1;
@@ -235,11 +194,10 @@ begin
 					end if;
 				end if;
 				
-				
 			elsif state = 3 then
 				if write_ack ='1' then
 					write_req <= nilreq;
-					cpu_res1 <= '1'&mem_res1;
+					cpu_res1 <= tmp_cpu_res1;
 					state := 4;
 				end if;
 			elsif state = 4 then
@@ -272,18 +230,18 @@ begin
 			     if re2='0' and emp2 ='0' then
 			         re2 <= '1';
 			         state := 1;
-			         
 			     end if;
 			elsif state =1 then
 				re2 <= '0';
-			     if mem_ack2 = '1' then
-			         
+			    if mem_ack2 = '1' then
+			         tmp_snp_res <= '1'&mem_res2;
+			         tmp_hit <= hit2;
 			         state := 2;
-			     end if;
+			    end if;
 			elsif state =2 then
 			     if full_srs = '0' then
-			         snoop_hit <= hit2;
-			         snoop_res <= '1'&mem_res2;
+			         snoop_hit <= tmp_hit;
+			         snoop_res <= tmp_snp_res;
 			         state := 0;
 			     end if;
 			end if;
@@ -346,6 +304,7 @@ begin
             mem_res2 <= nilreq(49 downto 0);
             write_ack <= '0';
             upd_ack <= '0';
+            wb_req<=nilreq;
 			if mem_req1(50 downto 50)="1" then
 				indx := to_integer(unsigned(mem_req1(41 downto 32)));
          		memcont:=ROM_array(indx);
@@ -366,7 +325,6 @@ begin
                 
 
 			if mem_req2(50 downto 50)="1" then
-			    
 				indx:=to_integer(unsigned(mem_req2(41 downto 32)));
 				memcont:=ROM_array(indx);
 				-- if we can't find it in memory
@@ -378,6 +336,13 @@ begin
 				else
 					mem_ack2<='1';
 					hit2<='1';
+					--if it's write, invalidate the cache line
+					if mem_req2(49 downto 48) ="10" then
+						ROM_array(indx)(40) <= '0';
+					else
+					--if it's read, mark the exclusive as 0
+						ROM_array(indx)(38) <= '0';
+					end if;
 					mem_res2<=mem_req2(49 downto 32)&memcont(31 downto 0);
 				end if;
 			else
@@ -390,20 +355,20 @@ begin
 			-- Handling CPU write request (no update req from bus)
 			if write_req(50 downto 50)="1" and upd_req(50 downto 50)="0" then
 				indx := to_integer(unsigned(write_req(41 downto 32)));
-				ROM_array(indx)<="100"&write_req(47 downto 42)&write_req(31 downto 0);
+				ROM_array(indx)<="111"&write_req(47 downto 42)&write_req(31 downto 0);
 				write_ack<='1';    
                 upd_ack <='0';
                 wt_res <= write_req(49 downto 0);
+                
 			-- Handling update request (no write_req from CPU)
 			elsif upd_req(50 downto 50)="1" and write_req(50 downto 50)="0" then
-				
 				indx := to_integer(unsigned(upd_req(41 downto 32)));
 				memcont := ROM_array(indx);
 				--if tags do not match, dirty bit is 1, and write_back fifo in BUS is not full, 
-				if memcont(37 downto 32) /= upd_req(47 downto 42) and memcont(39 downto 39) = "1" and full_wb = '0' then
+				if memcont(39 downto 39) = "1" and full_wb /= '1' then
 					wb_req <= "111"& memcont(37 downto 32)&upd_req(41 downto 32)&memcont(31 downto 0);
 				end if;
-				ROM_array(indx) <= "100" & upd_req(47 downto 42)&upd_req(31 downto 0);
+				ROM_array(indx) <= "101"&upd_req(47 downto 42)&upd_req(31 downto 0);
 				upd_ack<='1';
 				upd_res<=upd_req(49 downto 0);
                 write_ack<='0';
@@ -418,15 +383,16 @@ begin
                         else
                             shifter:=true;
                             --if tags do not match, dirty bit is 1, and write_back fifo in BUS is not full, 
-							if memcont(37 downto 32) /= upd_req(47 downto 42) and memcont(39 downto 39) = "1" and full_wb = '0' then
+							if memcont(39 downto 39) = "1" and full_wb /= '1' then
 								wb_req <= "111"& memcont(37 downto 32)&upd_req(41 downto 32)&memcont(31 downto 0);
 							end if;
-							ROM_array(indx) <= "100" & upd_req(47 downto 42)&upd_req(31 downto 0);
+							ROM_array(indx) <= "101" & upd_req(47 downto 42)&upd_req(31 downto 0);
 							upd_ack<='1';
                 			write_ack<='0';
                 			upd_res <= upd_req(49 downto 0);
                         end if;
-                        
+            
+              	          
               end if;
       end if;
    end process;

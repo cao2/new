@@ -1,22 +1,3 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 10/25/2015 08:51:49 PM
--- Design Name: 
--- Module Name: SOC - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
 
 
 library IEEE;
@@ -25,13 +6,10 @@ USE ieee.numeric_std.ALL;
 use work.nondeterminism.all;
 use std.textio.all;
 use IEEE.std_logic_textio.all; 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+
+
+	
+   
 
 entity CPU is
     Port ( reset : in   std_logic;
@@ -44,68 +22,86 @@ entity CPU is
 end CPU;
 
 
-
+   
+   	
 architecture Behavioral of CPU is
  signal first_time : integer:=0;
-
+ signal data: std_logic_vector(31 downto 0);
+ signal adx : std_logic_vector(15 downto 0);
+ signal tmp_req: std_logic_vector(50 downto 0);
+ 
+ signal rand1:integer:=1;
+ signal rand2: std_logic_vector(15 downto 0):="0101010101010111";
+ signal rand3: std_logic_vector(31 downto 0):="10101010101010101010101010101010";
+ 
+ 
+ procedure read( signal adx: in std_logic_vector(15 downto 0);
+ 				 signal req: out std_logic_vector(50 downto 0);
+ 				signal data: out std_logic_vector(31 downto 0)) is
+   		begin
+   			req <= "101" & adx & "00000000000000000000000000000000";
+   			wait for 3 ps;
+   			req <= (others => '0');
+   			wait until cpu_res(50 downto 50)= "1";
+   			data <= cpu_res(31 downto 0);	
+   			wait for 10 ps;
+ end  read;
+ 
+ procedure write( signal adx: in std_logic_vector(15 downto 0);
+ 				 signal req: out std_logic_vector(50 downto 0);
+ 				signal data: in std_logic_vector(31 downto 0)) is
+   		begin
+   			req <= "110" & adx & data;
+   			wait for 3 ps;
+   			req <= (others => '0');
+   			wait until cpu_res(50 downto 50)= "1";
+   				
+ end  write;
+ 
+ 
+ 
+ 
 begin
+	 
+   	req1: process(reset, Clock)
+   	begin
+   		if reset ='1' then
+			---tmp_req <= (others => '0');
+			cpu_req <= (others => '0');
+		elsif (rising_edge(Clock)) then
+			cpu_req <= tmp_req;
+			---tmp_req <= (others => '0');
+		end if;
+   	end process;
+   	
+	
 -- processor random generate read or write request
-    p1 : process (reset, Clock)
-     variable readsucc: integer :=0;
-     variable writesucc: integer :=0;
-     variable cmd: integer:=2;
+    p1 : process 
      variable nilreq: std_logic_vector(50 downto 0):=(others=>'0');
-     
      --if rand1 is 1 then read request
-     --if rand1 is 2 then write request
-     variable rand1:integer:=selection(2);
-     --generate the random address & cnontent
-     variable rand2: std_logic_vector(15 downto 0):=selection(2**15-1,16);
-     variable rand3: std_logic_vector(31 downto 0):=selection(2**15-1,32);
-     variable new_req : std_logic_vector(50 downto 0);
-	 variable blk: boolean :=true;
+     --if rand1 is 2 then write request     
     begin
-     if reset = '1' then
-        new_req := (others => '0');
-        first_time <= 0;
-        blk := true;
-     elsif (rising_edge(Clock)) then
-       
-        if (first_time <2 and blk = true) then
-           blk:=false;
-           first_time <= first_time+1;
-           rand1 := selection(2);
-           rand2 :=selection(2**15-1,16);
-           rand3 :=selection(2**15-1,32);
-     	   if (full_c/='1') then
-          	if (rand1 = 1) then---read
-            	new_req := "101" & rand2 & rand3;
-          	elsif (rand1 =2) then
-            	new_req := "110"& rand2 & rand3;
-          	end if;
-      	--else if the cache buffer is full, don't send anything
-       	   end if;
-       	elsif (first_time <2 and blk = false) then
-       	 	new_req := (others => '0');
-       		blk := true;
-       	else
-       	    new_req := (others => '0');
-       	end if;
-       	
-       --if received any request from cache
-       --if request valide bit is not 0
-    	if cpu_res(50 downto 50)="1" then
-            cmd:=to_integer(unsigned(cpu_res(49 downto 48)));
-            if(cmd=0) then
-                readsucc:=readsucc+1;
-            elsif cmd=1 then
-                writesucc:=writesucc+1;
-            end if;
-        end if;
+    	wait for 70 ps;
+    	for I in 1 to 2 loop
+    		--wait for 20 ps;
+    		rand1 <= selection(2);
+        	rand2 <=selection(2**2-1,3)&"0000000000000";
+        	rand3 <=selection(2**15-1,32);
+            if rand1=1 then
+        		read (rand2, tmp_req, data);
+        		
+        		
+        	else
+        		write (rand2, tmp_req, rand3);
+            	---tmp_req <= (others => '0');
+          	end if;  
+        end loop;
         
-        cpu_req <= new_req;         
-    end if;
+        wait;
+
   end process; 
  
 
+
+  
 end Behavioral;

@@ -56,6 +56,7 @@ architecture Behavioral of top is
    signal mem_wb: std_logic_vector(50 downto 0);
    signal wb_ack: std_logic;
    file trace_file: TEXT open write_mode is "trace1.log";
+   --file waveform: TEXT open write_mode is "wave.vcd";
 begin
 reset_proc : process
     begin
@@ -70,6 +71,7 @@ reset_proc : process
 clk_gen : process
   
        variable line_output:line;
+       --variable ll:line;
        variable logsr: string(8 downto 1);
        variable x : integer:=0;
        variable empp: string(51 downto 1) := (others => 'N');
@@ -186,14 +188,16 @@ clk_gen : process
         else
 		    write(line_output, empp);  
 		end if;
-		write(line_output, coma);       
+		write(line_output, coma); 
+		      
         if mem_wb(50 downto 50) = "1" then
-
             write(line_output, mem_wb);
         else
 		    write(line_output, empp);  
 		end if;
+		
 		write(line_output, coma);
+		
 		write(line_output,wb_ack);
 		writeline(trace_file, line_output);
    end loop;
@@ -203,7 +207,7 @@ clk_gen : process
     cpu1: entity work.CPU(Behavioral) port map(
        reset => reset,
        Clock=>Clock,
-       seed=>5,
+       seed=>50,
        cpu_res=>cpu_res1,
        cpu_req=>cpu_req1,
        full_c=>full_c1_u
@@ -212,7 +216,7 @@ clk_gen : process
    cpu2: entity work.CPU(Behavioral) port map(
           reset => reset,
           Clock=>Clock,
-          seed=>5,
+          seed=>1,
           cpu_res=>cpu_res2,
           cpu_req=>cpu_req2,
           full_c=>full_c2_u

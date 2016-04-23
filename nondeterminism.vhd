@@ -2,6 +2,7 @@ library ieee;
 use ieee.math_real.all;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
+
 package nondeterminism is
   shared variable s1: integer:= 844396720;
   shared variable s2: integer:= 821616997;
