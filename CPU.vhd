@@ -55,7 +55,7 @@ architecture Behavioral of CPU is
    			wait for 3 ps;
    			req <= (others => '0');
    			wait until cpu_res(50 downto 50)= "1";
-   				
+   			wait for 10 ps;	
  end  write;
  
  
@@ -66,11 +66,9 @@ begin
    	req1: process(reset, Clock)
    	begin
    		if reset ='1' then
-			---tmp_req <= (others => '0');
 			cpu_req <= (others => '0');
 		elsif (rising_edge(Clock)) then
 			cpu_req <= tmp_req;
-			---tmp_req <= (others => '0');
 		end if;
    	end process;
    	
@@ -82,19 +80,17 @@ begin
      --if rand1 is 2 then write request     
     begin
     	wait for 70 ps;
-    	for I in 1 to 2 loop
+    	for I in 1 to 10000 loop
     		--wait for 20 ps;
     		rand1 <= selection(2);
         	rand2 <=selection(2**2-1,3)&"0000000000000";
         	rand3 <=selection(2**15-1,32);
             if rand1=1 then
         		read (rand2, tmp_req, data);
-        		
-        		
         	else
         		write (rand2, tmp_req, rand3);
-            	---tmp_req <= (others => '0');
           	end if;  
+          	wait for 10 ps;
         end loop;
         
         wait;
