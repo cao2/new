@@ -41,13 +41,13 @@ begin
        -- res<=nada;
         if req(50 downto 50) = "1" then
         	address:=to_integer(unsigned(req(47 downto 32)));
-        	if (ROM_array(address)=nilmem and req(49 downto 48)="01") then
-        		tpmem := selection(2**31-1,32);
-        	elsif (ROM_array(address)=nilmem and req(49 downto 48)="10") then
-        		tpmem := req(31 downto 0);
+        	if (req(49 downto 48)="01") then
+        		res<=req(51 downto 32) & ROM_array(address);
+        	elsif (req(49 downto 48)="10") then
+        		ROM_array(address) <= req(31 downto 0);
+        		res<=req;
         	end if;
-        	ROM_array(address) <= tpmem;
-        	res <= req(51 downto 32) & tpmem;
+        	
         else
             res <= (others => '0');
         end if;

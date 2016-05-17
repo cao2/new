@@ -317,7 +317,11 @@ begin
 				else
 					mem_ack1<='1';
 					hit1<='1';
-					mem_res1 <= mem_req1(49 downto 32)& memcont(31 downto 0);
+					if mem_req1(49 downto 48)="10" then
+						mem_res1 <= mem_req1(49 downto 0);
+					else
+						mem_res1 <= mem_req1(49 downto 32)& memcont(31 downto 0);
+					end if;
 				end if;
 			else
 			    mem_ack1<='0';

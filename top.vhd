@@ -6,17 +6,7 @@
 -- Design Name: 
 -- Module Name: top - Behavioral
 -- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 --use iEEE.std_logic_unsigned.all ;
@@ -24,14 +14,6 @@ USE ieee.numeric_std.ALL;
 
 use std.textio.all;
 use IEEE.std_logic_textio.all; 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 entity top is
     
@@ -55,8 +37,7 @@ architecture Behavioral of top is
    
    signal mem_wb: std_logic_vector(50 downto 0);
    signal wb_ack: std_logic;
-   file trace_file: TEXT open write_mode is "trace1.log";
-   --file waveform: TEXT open write_mode is "wave.vcd";
+   file trace_file: TEXT open write_mode is "trace1.txt";
 begin
 reset_proc : process
     begin
@@ -207,7 +188,7 @@ clk_gen : process
     cpu1: entity work.CPU(Behavioral) port map(
        reset => reset,
        Clock=>Clock,
-       seed=>50,
+       seed=>1,
        cpu_res=>cpu_res1,
        cpu_req=>cpu_req1,
        full_c=>full_c1_u
@@ -216,7 +197,7 @@ clk_gen : process
    cpu2: entity work.CPU(Behavioral) port map(
           reset => reset,
           Clock=>Clock,
-          seed=>1,
+          seed=>2,
           cpu_res=>cpu_res2,
           cpu_req=>cpu_req2,
           full_c=>full_c2_u
