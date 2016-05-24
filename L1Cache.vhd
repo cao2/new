@@ -309,7 +309,7 @@ begin
 				indx := to_integer(unsigned(mem_req1(41 downto 32)));
          		memcont:=ROM_array(indx);
          		--if we can't find it in memory
-         		if memcont=nilmem or memcont(40 downto 40)="0" or memcont(38 downto 38)="0"
+         		if memcont=nilmem or memcont(40 downto 40)="0" or (memcont(38 downto 38)="0" and mem_req1(49 downto 48)="10")
                         or memcont(37 downto 32)/=mem_req1(47 downto 42) then
 					mem_ack1<='1';
 					hit1 <= '0';
@@ -332,7 +332,7 @@ begin
 				indx:=to_integer(unsigned(mem_req2(41 downto 32)));
 				memcont:=ROM_array(indx);
 				-- if we can't find it in memory
-				if memcont=nilmem or memcont(40 downto 40)="0" or memcont(38 downto 38)="0"
+				if memcont=nilmem or memcont(40 downto 40)="0" 
                         or memcont(37 downto 32)/=mem_req2(47 downto 42) then
 					mem_ack2<='1';
 					hit2<='0';
@@ -370,9 +370,9 @@ begin
 				memcont := ROM_array(indx);
 				--if tags do not match, dirty bit is 1, and write_back fifo in BUS is not full, 
 				if memcont(39 downto 39) = "1" and full_wb /= '1' then
-					wb_req <= "111"& memcont(37 downto 32)&upd_req(41 downto 32)&memcont(31 downto 0);
+					wb_req <= "110"& memcont(37 downto 32)&upd_req(41 downto 32)&memcont(31 downto 0);
 				end if;
-				ROM_array(indx) <= "101"&upd_req(47 downto 42)&upd_req(31 downto 0);
+				ROM_array(indx) <= "100"&upd_req(47 downto 42)&upd_req(31 downto 0);
 				upd_ack<='1';
 				upd_res<=upd_req(49 downto 0);
                 write_ack<='0';
@@ -380,7 +380,7 @@ begin
                         if shifter=true then
                             shifter:=false;
                             indx:=to_integer(unsigned(write_req(41 downto 32)));
-                            ROM_array(indx)<="100"&write_req(47 downto 42)&write_req(31 downto 0);
+                            ROM_array(indx)<="111"&write_req(47 downto 42)&write_req(31 downto 0);
                             write_ack<='1';  
                             upd_ack <='0';  
                             wt_res <= write_req(49 downto 0);
@@ -388,9 +388,9 @@ begin
                             shifter:=true;
                             --if tags do not match, dirty bit is 1, and write_back fifo in BUS is not full, 
 							if memcont(39 downto 39) = "1" and full_wb /= '1' then
-								wb_req <= "111"& memcont(37 downto 32)&upd_req(41 downto 32)&memcont(31 downto 0);
+								wb_req <= "110"& memcont(37 downto 32)&upd_req(41 downto 32)&memcont(31 downto 0);
 							end if;
-							ROM_array(indx) <= "101" & upd_req(47 downto 42)&upd_req(31 downto 0);
+							ROM_array(indx) <= "100" & upd_req(47 downto 42)&upd_req(31 downto 0);
 							upd_ack<='1';
                 			write_ack<='0';
                 			upd_res <= upd_req(49 downto 0);

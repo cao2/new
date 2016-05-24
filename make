@@ -11,4 +11,4 @@ ghdl -a --ieee=synopsys  top.vhd
 ghdl -a PWR.vhd
 ghdl -e --ieee=synopsys  top
 
-./top --stop-time=20000ps  --vcd=new.vcd 
+./top --stop-time=50000ps  --vcd=new.vcd 

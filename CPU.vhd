@@ -97,7 +97,7 @@ begin
     	write(flag0,tmp_req,zero);
     	write(flag1,tmp_req,zero);
     	---write(crit, tmp_req, zero);
-	for I in 1 to 5 loop
+	for I in 1 to 2 loop
     	if seed = 1 then
     		---flag0=1, turn =1
     		 

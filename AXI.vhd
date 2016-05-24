@@ -74,7 +74,7 @@ architecture Behavioral of AXI is
     
     signal wb_ack1, wb_ack2 : std_logic;
     signal mem_wb1, mem_wb2, tmp_mem_wb1, tmp_mem_wb2 : std_logic_vector (50 downto 0):=(others => '0');
-    
+    signal reg_1, reg_2: std_logic_vector(50 downto 0) := (others=>'0');
     --state information of power
 	signal gfxpoweron: std_logic:='0';
 	
@@ -343,10 +343,12 @@ architecture Behavioral of AXI is
     				stage :=2;
     				---response for cpu1
     				if out3(51 downto 51) ="0"  then
+    					reg_1 <= out3(50 downto 0);
     					bus_res1_1 <= out3(50 downto 0);
     					cpu1 := '1';
     				---response for cpu2
     				else
+    					reg_2 <= out3(50 downto 0);
     					bus_res2_2 <= out3(50 downto 0);
     					cpu1 := '0';
     				end if;
