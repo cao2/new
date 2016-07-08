@@ -1,31 +1,34 @@
 v 4
-file . "PWR.vhd" "9f0169f125e05ea17df88548737011855778c8cd" "20160524035113.965":
-  entity pwr at 22( 464) + 0 on 1709;
-  architecture behavioral of pwr at 47( 1242) + 0 on 1710;
-file . "L1Cache.vhd" "65a32e642b496bd42baa0537f2fcf94313110da0" "20160524035113.685":
-  entity l1cache at 2( 1) + 0 on 1705;
-  architecture behavioral of l1cache at 46( 1559) + 0 on 1706;
-file . "AXI.vhd" "6b6225ddb03afd26893f59e4558539ebb81beff2" "20160524035113.465":
-  entity axi at 9( 204) + 0 on 1701;
-  architecture behavioral of axi at 49( 1522) + 0 on 1702;
-file . "std_fifo.vhd" "b5504c9b15f452f6b151ed9f20331924d44910ef" "20160524035113.327":
-  entity std_fifo at 1( 0) + 0 on 1697;
-  architecture behavioral of std_fifo at 22( 481) + 0 on 1698;
-file . "arbiter2.vhd" "f573b805fadd06b1ecacbe3b1dc2590e29cd96dd" "20160524035113.204":
-  entity arbiter2 at 1( 0) + 0 on 1693;
-  architecture behavioral of arbiter2 at 21( 465) + 0 on 1694;
-file . "arbiter.vhd" "2b8dcee1e08f772b1f372dbfc384878515125a6b" "20160524035113.081":
-  entity arbiter at 1( 0) + 0 on 1691;
-  architecture behavioral of arbiter at 21( 483) + 0 on 1692;
-file . "nondeterminism.vhd" "dd49916f65f9dc0d483dcf1e9cb2426b4594a89a" "20160524035113.291":
-  package nondeterminism at 1( 0) + 0 on 1695 body;
-  package body nondeterminism at 18( 683) + 0 on 1696;
-file . "CPU.vhd" "8c691b653e0aa525aabc7c6445ebca264403dbbd" "20160524035113.393":
-  entity cpu at 1( 0) + 0 on 1699;
-  architecture behavioral of cpu at 20( 429) + 0 on 1700;
-file . "Memory.vhd" "4fccd6fe802ff7720ccd597adc4a409c58eaa9b8" "20160524035113.636":
-  entity memory at 2( 1) + 0 on 1703;
-  architecture behavioral of memory at 18( 466) + 0 on 1704;
-file . "top.vhd" "bdb5b1d796bb3ebbf808e83d9151b78754acc6a2" "20160524035113.864":
-  entity top at 10( 222) + 0 on 1707;
-  architecture behavioral of top at 22( 410) + 0 on 1708;
+file . "PWR.vhd" "30e0d7f2bdf40cde4e59a49ea8174bde146ec142" "20160614021415.273":
+  entity pwr at 22( 464) + 0 on 2907;
+  architecture behavioral of pwr at 47( 1196) + 0 on 2908;
+file . "L1Cache.vhd" "8db74b7c24c4bcde423ed2d47e36b7197901df03" "20160614021415.382":
+  entity l1cache at 2( 1) + 0 on 2911;
+  architecture behavioral of l1cache at 46( 1559) + 0 on 2912;
+file . "AXI.vhd" "2c2e15d30805f31bc17835e85df2707c591709a6" "20160614021415.032":
+  entity axi at 9( 204) + 0 on 2903;
+  architecture behavioral of axi at 51( 1652) + 0 on 2904;
+file . "std_fifo.vhd" "b5504c9b15f452f6b151ed9f20331924d44910ef" "20160614021414.874":
+  entity std_fifo at 1( 0) + 0 on 2899;
+  architecture behavioral of std_fifo at 22( 481) + 0 on 2900;
+file . "arbiter2.vhd" "7fa11437b03e7a6c14e8c860faf460deaf27914f" "20160614021414.775":
+  entity arbiter2 at 1( 0) + 0 on 2895;
+  architecture behavioral of arbiter2 at 24( 556) + 0 on 2896;
+file . "arbiter.vhd" "2b8dcee1e08f772b1f372dbfc384878515125a6b" "20160614021414.704":
+  entity arbiter at 1( 0) + 0 on 2893;
+  architecture behavioral of arbiter at 21( 483) + 0 on 2894;
+file . "nondeterminism.vhd" "dd49916f65f9dc0d483dcf1e9cb2426b4594a89a" "20160614021414.848":
+  package nondeterminism at 1( 0) + 0 on 2897 body;
+  package body nondeterminism at 18( 683) + 0 on 2898;
+file . "CPU.vhd" "d788f5410f14dca9108da2bf70589f6128317371" "20160614021414.947":
+  entity cpu at 1( 0) + 0 on 2901;
+  architecture behavioral of cpu at 20( 429) + 0 on 2902;
+file . "Memory.vhd" "4fccd6fe802ff7720ccd597adc4a409c58eaa9b8" "20160614021415.328":
+  entity memory at 2( 1) + 0 on 2909;
+  architecture behavioral of memory at 18( 466) + 0 on 2910;
+file . "top.vhd" "f8c0e48e8b82fbb0928d51a991cdb2680a19cb9f" "20160614021415.572":
+  entity top at 10( 222) + 0 on 2913;
+  architecture behavioral of top at 22( 410) + 0 on 2914;
+file . "gfx.vhd" "e5489eced94cc03dafa7036d4200b0f854c84cbc" "20160614021415.239":
+  entity gfx at 2( 1) + 0 on 2905;
+  architecture behavioral of gfx at 21( 535) + 0 on 2906;

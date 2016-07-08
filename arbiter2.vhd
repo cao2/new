@@ -3,17 +3,20 @@ use IEEE.STD_LOGIC_1164.ALL;
 USE ieee.numeric_std.ALL;
 
 entity arbiter2 is
+	Generic (
+		constant DATA_WIDTH  : positive := 51
+	);
     Port (
             clock: in std_logic;
             reset: in std_logic;
             
-            din1: 	in STD_LOGIC_VECTOR(50 downto 0);
+            din1: 	in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
             ack1: 	out STD_LOGIC;
             
-            din2:	in std_logic_vector(50 downto 0);
+            din2:	in std_logic_vector(DATA_WIDTH - 1 downto 0);
             ack2:	out std_logic;
             
-            dout:	out std_logic_vector(50 downto 0)
+            dout:	out std_logic_vector(DATA_WIDTH - 1 downto 0)
      );
 end arbiter2;
 
@@ -25,7 +28,7 @@ architecture Behavioral of arbiter2 is
 		
 begin  
  	process (reset, clock)
-        variable nilreq : std_logic_vector(50 downto 0):=(others => '0');
+        variable nilreq : std_logic_vector(DATA_WIDTH - 1 downto 0):=(others => '0');
         variable cmd: std_logic_vector( 1 downto 0);
     begin
         if reset = '1' then
@@ -34,7 +37,7 @@ begin
         	s_ack2 <= '0';
         	dout <=  nilreq;
         elsif rising_edge(clock) then
-        	cmd:= din1(50 downto 50) & din2(50 downto 50);
+        	cmd:= din1(DATA_WIDTH-1 downto DATA_WIDTH-1) & din2(DATA_WIDTH-1 downto DATA_WIDTH-1);
         	dout <= nilreq;
             s_ack1 <= '0';
             s_ack2 <= '0';    

@@ -52,6 +52,17 @@ architecture Behavioral of CPU is
    			wait for 10 ps;	
  end  write;
  
+ procedure power( variable cmd: in std_logic_vector(1 downto 0);
+ 				signal req: out std_logic_vector(50 downto 0);
+ 				variable hw: in std_logic_vector(1 downto 0)) is
+   		begin
+   			req <= "111" & cmd & hw & "00000000"&"00000000"&"00000000"&"00000000"&"00000000"&"0000" ;
+   			wait for 3 ps;
+   			req <= (others => '0');
+   			---wait until cpu_res(50 downto 50)= "1";
+   			wait for 50 ps;	
+ end  power;
+ 
  
  
  
@@ -70,11 +81,11 @@ begin
  p1 : process 
      variable nilreq: std_logic_vector(50 downto 0):=(others=>'0');
      
-     variable flag0: std_logic_vector(15 downto 0):="0000"&"0000"&"0000"&"0010";
-     variable flag1: std_logic_vector(15 downto 0):="0000"&"0000"&"0000"&"0011";
-     variable turn: std_logic_vector(15 downto 0):="0000"&"0000"&"0000"&"0100";
-     variable shar: std_logic_vector(15 downto 0):="0000"&"0000"&"0000"&"0101";
-     variable crit: std_logic_vector(15 downto 0):="0000"&"0000"&"0000"&"0110";
+     variable flag0: std_logic_vector(15 downto 0):="0000"&"0000"&"0010"&"0000";
+     variable flag1: std_logic_vector(15 downto 0):="0000"&"0000"&"0011"&"0000";
+     variable turn: std_logic_vector(15 downto 0):="0000"&"0000"&"0100"&"0000";
+     variable shar: std_logic_vector(15 downto 0):="0000"&"0000"&"0101"&"0000";
+     variable crit: std_logic_vector(15 downto 0):="0000"&"0000"&"0110"&"0000";
 
 
      variable turn_v: std_logic_vector(31 downto 0);
@@ -90,68 +101,46 @@ begin
      
      variable line_output:line;
      variable logsr: string(8 downto 1);
-     
+     variable pwrcmd: std_logic_vector(1 downto 0);
+     variable hwlc: std_logic_vector(1 downto 0);
     begin
     	wait for 70 ps;
-    	
-    	write(flag0,tmp_req,zero);
-    	write(flag1,tmp_req,zero);
-    	---write(crit, tmp_req, zero);
-	for I in 1 to 2 loop
-    	if seed = 1 then
-    		---flag0=1, turn =1
-    		 
+    	pwrcmd := "00";
+    	hwlc := "00";
+    	power(pwrcmd, tmp_req, hwlc);
+	for I in 1 to 5 loop
+    	if seed = 1 then    		 
     		write(flag0,tmp_req,one);
-    		---logsr :="1wrtef0:";
-    		---write(line_output, logsr);
-			---writeline(trace_file, line_output);
-    		
-    		
     		write(turn,tmp_req,one);
-    		---logsr :="1wrtetr:";
-    		---write(line_output, logsr);
-			---writeline(trace_file, line_output);
-    		
-    		
     		read(turn, tmp_req, turn_v);
-    		---logsr :="1redtur:";
-    		---write(line_output, logsr);
-    		---write(line_output, turn_v);
-			---writeline(trace_file, line_output);
-    		
-    		
     		read(flag1, tmp_req, flag1_v);
-    		---logsr :="1redfl1:";
-    		---write(line_output, logsr);
-    		---write(line_output, flag1_v);
-			---writeline(trace_file, line_output);
     		
+    		logsr :="en0;trn:";
+    		write(line_output, logsr);
+    		write(line_output, turn_v);
+			writeline(trace_file, line_output);
+			logsr :="en0;fg1:";
+    		write(line_output, logsr);
+    		write(line_output, flag1_v);
+			writeline(trace_file, line_output);
+			
     		while turn_v=one and flag1_v=one loop
     			read(turn, tmp_req, turn_v);
     			read(flag1, tmp_req, flag1_v);
     			
-    		
-    			logsr :="1lP;trn:";
+    			logsr :="in0;trn:";
     			write(line_output, logsr);
-    			---write(line_output, turn_v);
+    			write(line_output, turn_v);
 				writeline(trace_file, line_output);
-			
-				---logsr :="1lp:fg1:";
-    			---write(line_output, logsr);
-    			---write(line_output, flag1_v);
-				---writeline(trace_file, line_output);
+				logsr :="in0;fg1:";
+    			write(line_output, logsr);
+    			write(line_output, flag1_v);
+				writeline(trace_file, line_output);
+    			
+    			
     		end loop;
-    		---critical++
-    		---logsr :="1utloop:";
-    		---write(line_output, logsr);
-			---writeline(trace_file, line_output);
 			
     		read(crit, tmp_req, crit_v);  
-    		---logsr :="1citica:";
-    		---write(line_output, logsr);
-    		---write(line_output, crit_v);
-			---writeline(trace_file, line_output);
-    		
     		  		
     		crit_v:= std_logic_vector(unsigned(crit_v)+1);
     		write(crit,tmp_req, crit_v);
@@ -162,65 +151,47 @@ begin
     		write(line_output, crit_v);
 			writeline(trace_file, line_output);
 			
-			
-    		---crit_v:= std_logic_vector(unsigned(crit_v)-1);
-    		---write(crit,tmp_req, crit_v);
-    		
-    		---flag0=1
     		write(flag0,tmp_req,zero);
     	elsif seed=2 then
-    		wait for 20 ps;
-    		---flag1=1, turn =0
+    		
     		write(flag1,tmp_req,one);
-    		---logsr :="2wrtef1:";
-    		---write(line_output, logsr);
-			---writeline(trace_file1, line_output);
     		
     		
     		write(turn,tmp_req,zero);
-    		---logsr :="2wrtetr:";
-    		---write(line_output, logsr);
-			---writeline(trace_file1, line_output);
     		
     		
     		read(turn, tmp_req, turn_v);
-    		---logsr :="2redtur:";
-    		---write(line_output, logsr);
-    		---write(line_output, turn_v);
-			---writeline(trace_file1, line_output);
     		
     		
     		read(flag0, tmp_req, flag0_v);
-    		---logsr :="2redfl0:";
-    		---write(line_output, logsr);
-    		---write(line_output, flag0_v);
-			---writeline(trace_file1, line_output);
-    		---while flag0==1&turn==0 wait
+    		
+    		
+    		logsr :="en1;trn:";
+    		write(line_output, logsr);
+    		write(line_output, turn_v);
+			writeline(trace_file1, line_output);
+			logsr :="en1;fg0:";
+    		write(line_output, logsr);
+    		write(line_output, flag0_v);
+			writeline(trace_file1, line_output);
+    		
     		while turn_v=zero and flag0_v=one loop
     			read(turn, tmp_req, turn_v);
     			read(flag0, tmp_req, flag0_v);
     			
     		
-    			logsr :="2lP;trn:";
+    			logsr :="in1;trn:";
     			write(line_output, logsr);
-    			---write(line_output, turn_v);
+    			write(line_output, turn_v);
 				writeline(trace_file1, line_output);
-			
-				---logsr :="2lp:fg0:";
-    			---write(line_output, logsr);
-    			---write(line_output, flag0_v);
-				---writeline(trace_file1, line_output);
+				logsr :="in1;fg0:";
+    			write(line_output, logsr);
+    			write(line_output, flag0_v);
+				writeline(trace_file1, line_output);
+				
     		end loop;
-    		---critical
-    		---logsr :="2utloop:";
-    		---write(line_output, logsr);
-			---writeline(trace_file1, line_output);
-			
+    		
     		read(crit, tmp_req, crit_v); 
-    		---logsr :="2citica:";
-    		---write(line_output, logsr);
-    		---write(line_output, crit_v);
-			---writeline(trace_file1, line_output);
     		
     		   		
     		crit_v:= std_logic_vector(unsigned(crit_v)+1);
@@ -233,15 +204,12 @@ begin
     		write(line_output, logsr);
     		write(line_output, crit_v);
 			writeline(trace_file1, line_output);
-    		---crit_v:= std_logic_vector(unsigned(crit_v)-1);
-    		---write(crit,tmp_req, crit_v);
     		
-    		---flag1=0
     		write(flag1,tmp_req,zero);
     		
     	end if;
   end loop;	
-        wait;
+  wait;
 
   end process; 
  

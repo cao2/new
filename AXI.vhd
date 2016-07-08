@@ -39,9 +39,11 @@ entity AXI is
             full_b_m: out std_logic:='0';
             
             mem_wb: out std_logic_vector(50 downto 0);
-            wb_ack: in std_logic
+            wb_ack: in std_logic;
            	
-                 
+            pwrreq: out std_logic_vector(4 downto 0);
+            pwrreq_full: in std_logic;
+            pwrres: in std_logic_vector(4 downto 0)  
      );
 end AXI;
 
@@ -77,6 +79,11 @@ architecture Behavioral of AXI is
     signal reg_1, reg_2: std_logic_vector(50 downto 0) := (others=>'0');
     --state information of power
 	signal gfxpoweron: std_logic:='0';
+	
+	signal adr_0, adr_1 : std_logic_vector(15 downto 0);
+	signal tmp_sp1, tmp_sp2: std_logic_vector(50 downto 0);
+	signal pwr_req1, pwr_req2: std_logic_vector(4 downto 0);
+	signal pwr_ack1, pwr_ack2: std_logic;
 	
  begin  
  
@@ -173,6 +180,20 @@ architecture Behavioral of AXI is
         dout => bus_res2 
     );
     
+    pwr_arbitor: entity work.arbiter2(Behavioral) 
+    generic map(
+        DATA_WIDTH => 5
+    )
+    port map(
+    	clock => Clock,
+        reset => reset,
+        din1 => pwr_req1,
+        ack1 => pwr_ack1,
+        din2 => pwr_req2,
+        ack2 => pwr_ack2,
+        dout => pwrreq 
+    );
+    
     brs1_arbitor: entity work.arbiter2(Behavioral) port map(
     	clock => Clock,
         reset => reset,
@@ -256,7 +277,22 @@ architecture Behavioral of AXI is
 	end process;
 	
 		
+	pwr_res_p: process(reset, Clock)
+	begin
+		if reset = '1' then
 		
+		elsif rising_edge(Clock) then
+			if pwrres(4 downto 4)="1" then
+				if pwrres(3 downto 2) ="00" then
+					gfxpoweron <= '0';
+				elsif pwrres( 3 downto 2) ="10" then
+					gfxpoweron <= '1';
+				end if;
+			end if;
+		end if;
+	end process;
+	
+	
 	---write_back process
 	wb_1_p: process(reset, Clock)
 		variable nilreq:std_logic_vector(50 downto 0):=(others => '0');
@@ -390,35 +426,88 @@ architecture Behavioral of AXI is
 	---deal with cache request
     cache_req1_p:process(reset,Clock)
         variable nilreq:std_logic_vector(50 downto 0):=(others => '0');
+        variable state: integer:=0;
+        variable count: integer:=0;
     begin
         if reset='1' then
         	snoop_req2 <= nilreq;
         elsif rising_edge(Clock) then
-            snoop_req2 <= nilreq;
-            if cache_req1(50 downto 50) = "1" and full_srq1/='1' then
-                snoop_req2 <= cache_req1;
-            else
-            	snoop_req2 <= nilreq;
-            end if;
+           	if state =0 then
+           		 if cache_req1(50 downto 50) = "1" and cache_req1(47 downto 32) = adr_1 then
+           		 	state :=1;
+           		 	tmp_sp2 <= cache_req1;
+           		 elsif cache_req1(50 downto 50) = "1" and cache_req1(49 downto 48) ="11" then
+                	pwr_req1 <= cache_req1(50 downto 46);
+                	state := 4;
+           		 else
+            		snoop_req2 <= nilreq;
+            		state := 0;
+                 end if;
+           	elsif state = 1 then
+           		state := 2;
+           	elsif state = 2 then
+           		count := count+1;
+           		if count > 20 then
+           			state := 3;
+           			count := 0;
+           		end if;
+           	elsif state = 3 then
+                snoop_req2 <= tmp_sp2;
+                adr_0 <= tmp_sp2(47 downto 32);
+           		state := 0;
+           	elsif state =4 then
+           		if pwr_ack1 = '1' then
+           			pwr_req1<= "00000";
+           			state := 0;
+           		end if;
+           	end if;   
         end if;
     end process;
     
 	---deal with cache request
     cache_req2_p:process(reset,Clock)
         variable nilreq:std_logic_vector(50 downto 0):=(others => '0');
+        variable state:integer := 0;
+        variable count: integer:= 0;
     begin
         if reset='1' then
             snoop_req1 <= nilreq;
         elsif rising_edge(Clock) then
-            snoop_req1 <= nilreq;
-            if cache_req2(50 downto 50) = "1" and full_srq2/='1' then
-                snoop_req1 <= cache_req2;
-            else 	
-            	snoop_req1 <= nilreq;
-            end if;
+           	if state =0 then
+           		 if cache_req2(50 downto 50) = "1" and cache_req2(47 downto 32) = adr_0 then
+           		 	state :=1;
+           		 	tmp_sp1 <= cache_req2;
+           		  elsif cache_req1(50 downto 50) = "1" and cache_req1(49 downto 48) ="11" then
+                	pwr_req2 <= cache_req2(50 downto 46);
+                	state := 4;
+           		 elsif cache_req2(50 downto 50) = "1" and full_srq2/='1' then
+                	snoop_req1 <= cache_req2;
+                	adr_1 <= cache_req2(47 downto 32);
+                	state :=0;
+           		 else
+            		snoop_req1 <= nilreq;
+            		state :=0;
+                 end if;
+           	elsif state = 1 then
+           		state := 2;
+           	elsif state = 2 then
+           		count := count+1;
+           		if count > 20 then
+           			count :=0;
+           			state := 3;
+           		end if;
+           	elsif state = 3 then
+                snoop_req1 <= tmp_sp1;
+                adr_1 <= tmp_sp1(47 downto 32);
+           		state := 0;
+           	elsif state =4 then
+           		if pwr_ack2 = '1' then
+           			pwr_req2<= "00000";
+           			state := 0;
+           		end if;
+           	end if;   
         end if;
     end process;    
-    
     snp_res1_p: process(reset, Clock)
         variable nilreq:std_logic_vector(50 downto 0):=(others => '0');
         variable state: integer:= 0;

@@ -63,7 +63,7 @@ architecture Behavioral of L1Cache is
 	signal prc:std_logic_vector(1 downto 0);
 	signal tmp_snp_res, tmp_cpu_res1: std_logic_vector(50 downto 0):=(others => '0');
 	signal tmp_hit : std_logic;
-	
+	signal tmp_mem: std_logic_vector(40 downto 0);
 begin
 	cpu_req_fif: entity work.STD_FIFO(Behavioral) port map(
 		CLK=>Clock,
@@ -121,6 +121,10 @@ begin
 	end process;
         
 
+	tmp_lala: process(Clock)
+	begin
+		tmp_mem <= ROM_array(96);
+	end process;
 	snp_req_fifo: process (Clock)
 	begin	  
 		if reset='1' then
@@ -309,7 +313,7 @@ begin
 				indx := to_integer(unsigned(mem_req1(41 downto 32)));
          		memcont:=ROM_array(indx);
          		--if we can't find it in memory
-         		if memcont=nilmem or memcont(40 downto 40)="0" or (memcont(38 downto 38)="0" and mem_req1(49 downto 48)="10")
+         		if memcont(40 downto 40)="0" or mem_req1(49 downto 48)="10" or mem_req1(49 downto 48)="11"
                         or memcont(37 downto 32)/=mem_req1(47 downto 42) then
 					mem_ack1<='1';
 					hit1 <= '0';
@@ -332,7 +336,7 @@ begin
 				indx:=to_integer(unsigned(mem_req2(41 downto 32)));
 				memcont:=ROM_array(indx);
 				-- if we can't find it in memory
-				if memcont=nilmem or memcont(40 downto 40)="0" 
+				if  memcont(40 downto 40)="0" 
                         or memcont(37 downto 32)/=mem_req2(47 downto 42) then
 					mem_ack2<='1';
 					hit2<='0';
@@ -343,11 +347,13 @@ begin
 					--if it's write, invalidate the cache line
 					if mem_req2(49 downto 48) ="10" then
 						ROM_array(indx)(40) <= '0';
+						mem_res2<=mem_req2(49 downto 0);
 					else
 					--if it's read, mark the exclusive as 0
 						ROM_array(indx)(38) <= '0';
+						mem_res2<=mem_req2(49 downto 32)&memcont(31 downto 0);
 					end if;
-					mem_res2<=mem_req2(49 downto 32)&memcont(31 downto 0);
+					
 				end if;
 			else
 			     mem_ack2<='0';
@@ -359,7 +365,7 @@ begin
 			-- Handling CPU write request (no update req from bus)
 			if write_req(50 downto 50)="1" and upd_req(50 downto 50)="0" then
 				indx := to_integer(unsigned(write_req(41 downto 32)));
-				ROM_array(indx)<="111"&write_req(47 downto 42)&write_req(31 downto 0);
+				ROM_array(indx)<="110"&write_req(47 downto 42)&write_req(31 downto 0);
 				write_ack<='1';    
                 upd_ack <='0';
                 wt_res <= write_req(49 downto 0);
@@ -369,7 +375,7 @@ begin
 				indx := to_integer(unsigned(upd_req(41 downto 32)));
 				memcont := ROM_array(indx);
 				--if tags do not match, dirty bit is 1, and write_back fifo in BUS is not full, 
-				if memcont(39 downto 39) = "1" and full_wb /= '1' then
+				if memcont(39 downto 39) = "1" and memcont(37 downto 32)/=upd_req(47 downto 42) and full_wb /= '1' then
 					wb_req <= "110"& memcont(37 downto 32)&upd_req(41 downto 32)&memcont(31 downto 0);
 				end if;
 				ROM_array(indx) <= "100"&upd_req(47 downto 42)&upd_req(31 downto 0);
@@ -380,14 +386,14 @@ begin
                         if shifter=true then
                             shifter:=false;
                             indx:=to_integer(unsigned(write_req(41 downto 32)));
-                            ROM_array(indx)<="111"&write_req(47 downto 42)&write_req(31 downto 0);
+                            ROM_array(indx)<="110"&write_req(47 downto 42)&write_req(31 downto 0);
                             write_ack<='1';  
                             upd_ack <='0';  
                             wt_res <= write_req(49 downto 0);
                         else
                             shifter:=true;
                             --if tags do not match, dirty bit is 1, and write_back fifo in BUS is not full, 
-							if memcont(39 downto 39) = "1" and full_wb /= '1' then
+							if memcont(39 downto 39) = "1" and memcont(37 downto 32)/=upd_req(47 downto 42) and full_wb /= '1' then
 								wb_req <= "110"& memcont(37 downto 32)&upd_req(41 downto 32)&memcont(31 downto 0);
 							end if;
 							ROM_array(indx) <= "100" & upd_req(47 downto 42)&upd_req(31 downto 0);

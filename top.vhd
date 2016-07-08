@@ -37,6 +37,9 @@ architecture Behavioral of top is
    
    signal mem_wb: std_logic_vector(50 downto 0);
    signal wb_ack: std_logic;
+   signal pwrreq,pwrres: std_logic_vector(4 downto 0);
+   signal pwrreq_full : std_logic;
+   signal gfxreq, gfxres: std_logic_vector(2 downto 0);
    file trace_file: TEXT open write_mode is "trace1.txt";
 begin
 reset_proc : process
@@ -274,9 +277,28 @@ clk_gen : process
         full_b_m=>full_b_m,
         full_m=>full_m,
         
+        pwrreq =>pwrreq,
+        pwrres =>pwrres,
+        pwrreq_full =>pwrreq_full,
+        
         mem_wb => mem_wb,
         wb_ack => wb_ack
         
+    );
+    power: entity work.PWR(Behavioral) port map(
+    	Clock=>Clock,
+    	reset=>reset,
+    	req=>pwrreq,
+    	res=>pwrres,
+    	full_preq=>pwrreq_full,
+    	gfxreq=>gfxreq,
+    	gfxres=>gfxres
+    );
+    gfx: entity work.gfx(Behavioral) port map(
+    	Clock=>Clock,
+    	reset=>reset,
+    	pwrreq=>gfxreq,
+    	pwrres=>gfxres
     );
     mem: entity work.Memory(Behavioral) port map(   
         Clock=>Clock,

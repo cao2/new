@@ -33,21 +33,22 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity PWR is
     Port (  Clock: in std_logic;
             reset: in std_logic;
-            full_pres: in std_logic;
+            
             req : in STD_LOGIC_VECTOR(4 downto 0);
-            
-            gfxfull: in std_logic;
-            gfxres : in STD_LOGIC_VECTOR(2 downto 0);
-            gfxreq : out STD_LOGIC_VECTOR(2 downto 0);
-            
             res: out STD_LOGIC_VECTOR(4 downto 0);
-            full_preq: out std_logic:='0');
+            full_preq: out std_logic:='0';
+            
+            gfxres : in STD_LOGIC_VECTOR(2 downto 0);
+            gfxreq : out STD_LOGIC_VECTOR(2 downto 0)
+            );
+            
 end PWR;
 
 architecture Behavioral of PWR is
 	signal tmp_req: std_logic_vector(4 downto 0);
 	signal in1,out1 : std_logic_vector(4 downto 0);
-	signal we1,re1,emp1 : std_logic;
+	signal in2,out2 : std_logic_vector(2 downto 0);
+	signal we1,re1,emp1,we2,re2,emp2 : std_logic:='0';
 begin
 
 	pwr_req_fif: entity work.STD_FIFO(Behavioral) 
@@ -66,6 +67,7 @@ begin
 		Empty=>emp1
 		);
 		
+	
 	pwr_req_fifo: process (Clock)      
 	begin
 		if reset='1' then
@@ -80,7 +82,9 @@ begin
 		end if;
 	end process;
 	
-	cpu_req_p:process (reset, Clock)
+	
+	
+	req_p:process (reset, Clock)
         variable nilreq:std_logic_vector(4 downto 0):=(others => '0');
         variable state: integer :=0;
 	begin
@@ -103,20 +107,11 @@ begin
 						state := 2;
 					end if;
 				end if;
-				
 			elsif state = 2 then
-				if tmp_req(1 downto 0)="00" then
-					if gfxfull/='1' then
-						gfxreq<=tmp_req(2 downto 0);
-						state := 3;
-					end if;
-				end if;
+				gfxreq<=tmp_req(4 downto 2);
+				state := 3;
 			elsif state = 3 then
 				if gfxres(2 downto 2) = "1" then
-					state :=4;
-				end if;
-			elsif state =4 then
-				if full_pres /= '1' then
 					res <= tmp_req;
 					state :=0;
 				end if;
