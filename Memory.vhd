@@ -16,7 +16,7 @@ entity Memory is
 end Memory;
 
 architecture Behavioral of Memory is
-     type rom_type is array (2**20-1 downto 0) of std_logic_vector (31 downto 0);     
+     type rom_type is array (2**16-1 downto 0) of std_logic_vector (31 downto 0);     
      signal ROM_array : rom_type:= (others=> (others=>'0'));
 
 begin
