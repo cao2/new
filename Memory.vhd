@@ -21,6 +21,7 @@ entity Memory is
             wdataready: out std_logic;
             ---write response channel
             wrready: in std_logic;
+            wrvalid: in std_logic;
             wrsp: out std_logic_vector(1 downto 0);
             
             );
@@ -43,7 +44,9 @@ begin
        wready <= '1';
        wdataready <= '0';
     elsif (rising_edge(Clock)) then
-    	if state = 1 then
+    	if state = 0 then
+    	    wrvalid <= '0';
+    	    wrsp <= "10";
     		if wvalid ='1' then
     			wready <='0';
     			address:=to_integer(unsigned(waddr));
@@ -57,21 +60,25 @@ begin
     		if wvalid ='1' then
     		---not sure if lengh or length -1
     			if lp < len-1 then
-    				
+    			    wdataready <= '0';
     				---strob here is not considered
         			ROM_array(address+lp) <= wdata(31 downto 0);
         			lp := lp +1;
+        			wdataready <= '1';
         			if wlast ='1' then
         				state := 3;
         			end if;
-        			wdataready <= '1';
         		else
         			state := 3;
         		end if;
         		
     		end if;
     	elsif state = 3 then
-    		if 
+    		if wrready =1 then
+    		    wrvalid <= '1';
+    		    wrsp <= "00";
+    		    state :=0;
+    		end if;
     	end if;
     end if;
     
