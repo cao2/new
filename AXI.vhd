@@ -19,12 +19,10 @@ entity AXI is
             
             wb_req1, wb_req2: in std_logic_vector(50 downto 0);
             
-            memres: in STD_LOGIC_VECTOR(51 downto 0);
            
            
-            bus_res1: out STD_LOGIC_VECTOR(50 downto 0);    
-            bus_res2: out STD_LOGIC_VECTOR(50 downto 0);
-            tomem: out STD_LOGIC_VECTOR(51 downto 0);
+            bus_res1: out STD_LOGIC_VECTOR(552 downto 0);    
+            bus_res2: out STD_LOGIC_VECTOR(552 downto 0);
             
             snoop_req1: out STD_LOGIC_VECTOR(50 downto 0);
             snoop_req2: out STD_LOGIC_VECTOR(50 downto 0);
@@ -43,7 +41,38 @@ entity AXI is
            	
             pwrreq: out std_logic_vector(4 downto 0);
             pwrreq_full: in std_logic;
-            pwrres: in std_logic_vector(4 downto 0)  
+            pwrres: in std_logic_vector(4 downto 0);
+            
+            ---write address channel
+            waddr: out std_logic_vector(31 downto 0);
+            wlen: out std_logic_vector(9 downto 0);
+            wsize: out std_logic_vector(9 downto 0);
+            wvalid: out std_logic;
+            wready: in std_logic;
+            ---write data channel
+            wdata: out std_logic_vector(31 downto 0);
+            wtrb: out std_logic_vector(3 downto 0);
+            wlast: out std_logic;
+            wdvalid: out std_logic;
+            wdataready: in std_logic;
+            ---write response channel
+            wrready: out std_logic;
+            wrvalid: in std_logic;
+            wrsp: in std_logic_vector(1 downto 0);
+            
+            ---read address channel
+            raddr: out std_logic_vector(31 downto 0);
+            rlen: out std_logic_vector(9 downto 0);
+            rsize: out std_logic_vector(9 downto 0);
+            rvalid: out std_logic;
+            rready: in std_logic;
+            ---read data channel
+            rdata: in std_logic_vector(31 downto 0);
+            rstrb: in std_logic_vector(3 downto 0);
+            rlast: in std_logic;
+            rdvalid: in std_logic;
+            rdready: out std_logic;
+            rres: in std_logic_vector(1 downto 0) 
      );
 end AXI;
 
@@ -85,6 +114,7 @@ architecture Behavioral of AXI is
 	signal pwr_req1, pwr_req2: std_logic_vector(4 downto 0);
 	signal pwr_ack1, pwr_ack2: std_logic;
 	
+	signal tomem_p: std_logic_vector(73 downto 0);
  begin  
  
 	
@@ -160,15 +190,15 @@ architecture Behavioral of AXI is
 		); 
  
    
-    tomem_arbitor: entity work.arbiter(Behavioral) port map(
+   tomem_arbitor: entity work.arbiter(Behavioral) port map(
     	clock => Clock,
         reset => reset,
         din1 => tomem1,
         ack1 => mem_ack1,
         din2 => tomem2,
         ack2 => mem_ack2,
-        dout => tomem
-    );
+        dout => tomem_p
+    );  
     
     brs2_arbitor: entity work.arbiter2(Behavioral) port map(
     	clock => Clock,
@@ -598,6 +628,53 @@ architecture Behavioral of AXI is
             end if;
         end if;
     end process;  
+     
+       
         
-        
+    tomem_channel: process(reset, Clock)
+    variable tdata: std_logic_vector(511 downto 0):=(others => '0');
+    variable state : integer :=0;
+    variable lp : integer :=0;
+    variable tep_mem : std_logic_vector(74 downto 0);
+    variable nullreq: std_logic_vector(552 downto 0) := (others => '0');
+    begin
+    	if reset= '1' then
+    		rvalid <= '0';
+    		rdready <= '0';
+    	elsif rising_edge(Clock) then
+    	    if state =0 then
+    	    	bus_res1 <= nullreq;
+    	    	bus_res1 <= nullreq;
+    			if tomem_p(72 downto 72)= '1' and rready = '1' then
+    				tep_mem := tomem_p;
+    				rvalid <= '1';
+    				raddr <= tomem_p(71 downto 64);
+    				rlen <= "00000"&"10000";
+    				rsize <= "00001"&"00000";
+    				state := 1;
+    			end if;
+    		elsif state = 1 then
+    			rvalid <= '0';
+    			rdready <= '1';
+    			state := 2;
+    		elsif state = 2 then
+    			if rdvalid = '1' and rres = "00" then
+    				rdready <= '0';
+    				tdata(lp*32+31 downto lp*32) := rdata;
+    				lp := lp +1;
+    				if rlast ='1' then
+    					state := 3;
+    				end if;	
+    				rdready <= '1';
+    			end if;
+    		elsif state = 3 then
+    			if temp_mem(73 downto 73)="0" then
+    				bus_res1 <= tep_mem(72 downto 32)&tdata;
+    			else
+    				bus_res2 <= tep_mem(72 downto 32)&tdata;
+    			end if;
+    			state := 0;
+    		end if;
+    	end if;
+    end process;
 end Behavioral;
