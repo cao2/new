@@ -107,7 +107,7 @@ begin
     	wait for 70 ps;
     	pwrcmd := "00";
     	hwlc := "00";
-    	power(pwrcmd, tmp_req, hwlc);
+    	---power(pwrcmd, tmp_req, hwlc);
 	for I in 1 to 5 loop
     	if seed = 1 then    		 
     		write(flag0,tmp_req,one);

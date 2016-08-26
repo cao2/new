@@ -7,12 +7,23 @@ use work.nondeterminism.all;
 entity Memory is
     Port (  Clock: in std_logic;
             reset: in std_logic;
-            full_b_m: in std_logic;
-            req : in STD_LOGIC_VECTOR(51 downto 0);
-            wb_req: in std_logic_vector(50 downto 0);
-            res: out STD_LOGIC_VECTOR(51 downto 0);
-            wb_ack: out std_logic;
-            full_m: out std_logic:='0');
+            ---write address chanel
+            waddr: in std_logic_vector(31 downto 0);
+            wlen: in std_logic_vector(9 downto 0);
+            wsize: in std_logic_vector(9 downto 0);
+            wvalid: in std_logic;
+            wready: out std_logic;
+            ---write data channel
+            wdata: in std_logic_vector(31 downto 0);
+            wtrb: in std_logic_vector(3 downto 0);
+            wlast: in std_logic;
+            wvalid: in std_logic;
+            wdataready: out std_logic;
+            ---write response channel
+            wrready: in std_logic;
+            wrsp: out std_logic_vector(1 downto 0);
+            
+            );
 end Memory;
 
 architecture Behavioral of Memory is
@@ -21,46 +32,53 @@ architecture Behavioral of Memory is
 
 begin
     
-  process (Clock)
-    
-    variable tmplog: std_logic_vector(51 downto 0);
-    variable enr: boolean:=false;
-    variable enw: boolean:=true; 
+  waddr: process (Clock, reset)
     variable address: integer;
-    variable flag: boolean:=false;
-    variable nada: std_logic_vector(51 downto 0) :=(others=>'0');
-    variable bo :boolean;
-    variable nilmem: std_logic_vector(31 downto 0) := (others=>'0');
-    variable tpmem: std_logic_vector(31 downto 0):= selection(2**31-1,32);
+    variable len: std_logic_vector(9 downto 0);
+    variable size: std_logic_vector(9 downto 0);
+    variable state : integer :=0;
+    variable lp: integer:=0;
     begin
     if reset ='1' then
-        res<=(others => '0');
-        wb_ack <='0';
+       wready <= '1';
+       wdataready <= '0';
     elsif (rising_edge(Clock)) then
-    --first set everything to default
-       -- res<=nada;
-        if req(50 downto 50) = "1" then
-        	address:=to_integer(unsigned(req(47 downto 32)));
-        	if (req(49 downto 48)="01") then
-        		res<=req(51 downto 32) & ROM_array(address);
-        	elsif (req(49 downto 48)="10") then
-        		ROM_array(address) <= req(31 downto 0);
-        		res<=req;
-        	end if;
-        	
-        else
-            res <= (others => '0');
-        end if;
-        
-        if wb_req(50 downto 50) = "1" then
-        	address:=to_integer(unsigned(wb_req(47 downto 32)));
-        	ROM_array(address) <= wb_req(31 downto 0);
-        	wb_ack <= '1';
-        else
-        	wb_ack <= '0';
-        end if;
-        
+    	if state = 1 then
+    		if wvalid ='1' then
+    			wready <='0';
+    			address:=to_integer(unsigned(waddr));
+    			len := wlen;
+    			size := wsize;
+    			state := 2;
+    			wdataready <= '1';
+    		end if;
+    		
+    	elsif state =2 then
+    		if wvalid ='1' then
+    		---not sure if lengh or length -1
+    			if lp < len-1 then
+    				
+    				---strob here is not considered
+        			ROM_array(address+lp) <= wdata(31 downto 0);
+        			lp := lp +1;
+        			if wlast ='1' then
+        				state := 3;
+        			end if;
+        			wdataready <= '1';
+        		else
+        			state := 3;
+        		end if;
+        		
+    		end if;
+    	elsif state = 3 then
+    		if 
+    	end if;
     end if;
+    
+    
+    
+    
+    
     end process;
 
 end Behavioral;
